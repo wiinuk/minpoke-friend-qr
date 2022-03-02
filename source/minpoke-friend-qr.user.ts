@@ -6,8 +6,8 @@
 // @version      0.1
 // @description  Add QR code to friend list
 // @author       Wiinuk
-// @match        https://9db.jp/pokego/data/432/*
-// @match        https://9db.jp/pokemongo/data/4264/*
+// @match        https://9db.jp/pokego/data/432*
+// @match        https://9db.jp/pokemongo/data/4264*
 // @icon         https://www.google.com/s2/favicons?domain=9db.jp
 // @grant        none
 // ==/UserScript==
