@@ -1,5 +1,11 @@
 {
-  "cSpell.words": ["tampermonkey", "Wiinuk"],
+  "cSpell.words": [
+    "minpoke",
+    "qrcode",
+    "rulesdir",
+    "tampermonkey",
+    "Wiinuk"
+  ],
   "[typescript]": {
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {

@@ -1,4 +1,3 @@
-// spell-checker: ignore rulesdir qrcode pokemongo
 /* eslint-disable rulesdir/no-unused-await */
 
 import qrCode from "qrcode";
