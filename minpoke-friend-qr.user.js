@@ -7,8 +7,8 @@
 // @version      0.1
 // @description  Add QR code to friend list
 // @author       Wiinuk
-// @match        https://9db.jp/pokego/data/432/*
-// @match        https://9db.jp/pokemongo/data/4264/*
+// @match        https://9db.jp/pokego/data/432*
+// @match        https://9db.jp/pokemongo/data/4264*
 // @icon         https://www.google.com/s2/favicons?domain=9db.jp
 // @grant        none
 // ==/UserScript==
@@ -3085,7 +3085,6 @@ var __webpack_exports__ = {};
 // EXTERNAL MODULE: ./node_modules/qrcode/lib/browser.js
 var browser = __webpack_require__(592);
 ;// CONCATENATED MODULE: ./source/minpoke-friend-qr.ts
-// spell-checker: ignore rulesdir qrcode pokemongo
 /* eslint-disable rulesdir/no-unused-await */
 var __makeTemplateObject = (undefined && undefined.__makeTemplateObject) || function (cooked, raw) {
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
