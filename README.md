@@ -29,7 +29,7 @@ npm run build
 
 1. Chrome に [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) をインストールする。
 1. 拡張機能 → Tampermonkey → ファイルの URL へのアクセスを許可する に ☑。
-1. [デバッグ用ファイル](../raw/master/wrapper_script_in_tampermonkey.user.js) を Tampermonkey にインストール。
+1. [デバッグ用ファイル](../../raw/master/wrapper_script_in_tampermonkey.user.js) を Tampermonkey にインストール。
 1. Tampermonkey の設定からデバッグ用ファイルを開いて `<ユーザー名>` を自分のユーザー名に置き換えて保存。
 
 #### 開始
