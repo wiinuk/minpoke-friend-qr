@@ -2,7 +2,7 @@
 
 ## 使い方
 
-[インストール](../raw/master/minpoke-friend-qr.user.js)
+[インストール](./raw/master/minpoke-friend-qr.user.js)
 
 // TODO: 操作説明
 
