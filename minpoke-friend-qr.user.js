@@ -3163,6 +3163,9 @@ var __values = (undefined && undefined.__values) || function(o) {
     throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 
+function id(x) {
+    return x;
+}
 function handleAsyncError(promise) {
     promise.catch(function (error) { return console.error(error); });
 }
@@ -3192,6 +3195,38 @@ function addStyle(cssOrTemplate) {
     }
     styleElement.textContent += css + "\n";
     document.head.appendChild(styleElement);
+}
+var setCache = [];
+function unique(array, getKey) {
+    var e_1, _a;
+    var _b;
+    var set = (_b = setCache.pop()) !== null && _b !== void 0 ? _b : new Set();
+    getKey !== null && getKey !== void 0 ? getKey : (getKey = id);
+    try {
+        var result = [];
+        try {
+            for (var array_1 = __values(array), array_1_1 = array_1.next(); !array_1_1.done; array_1_1 = array_1.next()) {
+                var item = array_1_1.value;
+                var key = getKey(item);
+                if (!set.has(key)) {
+                    set.add(key);
+                    result.push(item);
+                }
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (array_1_1 && !array_1_1.done && (_a = array_1.return)) _a.call(array_1);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+        return result;
+    }
+    finally {
+        set.clear();
+        setCache.push(set);
+    }
 }
 function getCodes(contents) {
     return __spreadArray([], __read(contents.matchAll(/(\d\s*){12}/g)), false).map(function (match) {
@@ -3277,8 +3312,8 @@ function asyncMain() {
             var _b, _c;
             var _d = _a === void 0 ? {} : _a, _e = _d.copyButton, copyButton = _e === void 0 ? true : _e;
             return __awaiter(this, void 0, void 0, function () {
-                var _f, _g, commentElement, parentElement, comment, codes, _loop_1, codes_1, codes_1_1, code, e_1_1, e_2_1;
-                var e_2, _h, e_1, _j;
+                var _f, _g, commentElement, parentElement, comment, codes, _loop_1, codes_1, codes_1_1, code, e_2_1, e_3_1;
+                var e_3, _h, e_2, _j;
                 var _this = this;
                 return __generator(this, function (_k) {
                     switch (_k.label) {
@@ -3295,7 +3330,7 @@ function asyncMain() {
                                 return [3 /*break*/, 9];
                             }
                             comment = (_c = commentElement.textContent) !== null && _c !== void 0 ? _c : "";
-                            codes = getCodes(comment);
+                            codes = unique(getCodes(comment));
                             _loop_1 = function (code) {
                                 var idContainerElement, numberElement, copyButton_1, _l, _m;
                                 return __generator(this, function (_o) {
@@ -3343,7 +3378,7 @@ function asyncMain() {
                             _k.label = 2;
                         case 2:
                             _k.trys.push([2, 7, 8, 9]);
-                            codes_1 = (e_1 = void 0, __values(codes)), codes_1_1 = codes_1.next();
+                            codes_1 = (e_2 = void 0, __values(codes)), codes_1_1 = codes_1.next();
                             _k.label = 3;
                         case 3:
                             if (!!codes_1_1.done) return [3 /*break*/, 6];
@@ -3357,28 +3392,28 @@ function asyncMain() {
                             return [3 /*break*/, 3];
                         case 6: return [3 /*break*/, 9];
                         case 7:
-                            e_1_1 = _k.sent();
-                            e_1 = { error: e_1_1 };
+                            e_2_1 = _k.sent();
+                            e_2 = { error: e_2_1 };
                             return [3 /*break*/, 9];
                         case 8:
                             try {
                                 if (codes_1_1 && !codes_1_1.done && (_j = codes_1.return)) _j.call(codes_1);
                             }
-                            finally { if (e_1) throw e_1.error; }
+                            finally { if (e_2) throw e_2.error; }
                             return [7 /*endfinally*/];
                         case 9:
                             _g = _f.next();
                             return [3 /*break*/, 1];
                         case 10: return [3 /*break*/, 13];
                         case 11:
-                            e_2_1 = _k.sent();
-                            e_2 = { error: e_2_1 };
+                            e_3_1 = _k.sent();
+                            e_3 = { error: e_3_1 };
                             return [3 /*break*/, 13];
                         case 12:
                             try {
                                 if (_g && !_g.done && (_h = _f.return)) _h.call(_f);
                             }
-                            finally { if (e_2) throw e_2.error; }
+                            finally { if (e_3) throw e_3.error; }
                             return [7 /*endfinally*/];
                         case 13: return [2 /*return*/];
                     }
