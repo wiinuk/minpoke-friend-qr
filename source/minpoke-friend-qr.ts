@@ -2,6 +2,9 @@
 
 import qrCode from "qrcode";
 
+function id<T>(x: T) {
+    return x;
+}
 function handleAsyncError(promise: Promise<void>) {
     promise.catch((error) => console.error(error));
 }
@@ -39,6 +42,33 @@ function addStyle(
     document.head.appendChild(styleElement);
 }
 
+const setCache: Set<unknown>[] = [];
+function unique<T>(array: Iterable<T> | readonly T[]): T[];
+function unique<T, K>(
+    array: Iterable<T> | readonly T[],
+    getKey: (element: T) => K
+): T[];
+function unique<T>(
+    array: Iterable<T> | readonly T[],
+    getKey?: (element: T) => unknown
+) {
+    const set = setCache.pop() ?? new Set<unknown>();
+    getKey ??= id;
+    try {
+        const result = [];
+        for (const item of array) {
+            const key = getKey(item);
+            if (!set.has(key)) {
+                set.add(key);
+                result.push(item);
+            }
+        }
+        return result;
+    } finally {
+        set.clear();
+        setCache.push(set);
+    }
+}
 function getCodes(contents: string) {
     return [...contents.matchAll(/(\d\s*){12}/g)].map((match) =>
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -167,7 +197,7 @@ async function asyncMain() {
                 continue;
             }
             const comment = commentElement.textContent ?? "";
-            const codes = getCodes(comment);
+            const codes = unique(getCodes(comment));
             for (const code of codes) {
                 const idContainerElement = document.createElement("span");
                 idContainerElement.classList.add(idContainerName);
