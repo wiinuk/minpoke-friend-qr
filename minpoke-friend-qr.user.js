@@ -4,7 +4,7 @@
 // @namespace    https://github.com/wiinuk/minpoke-friend-qr
 // @updateURL    https://github.com/wiinuk/minpoke-friend-qr/raw/master/minpoke-friend-qr.user.js
 // @homepageURL  https://github.com/wiinuk/minpoke-friend-qr
-// @version      0.1
+// @version      0.2.1
 // @description  Add QR code to friend list
 // @author       Wiinuk
 // @match        https://9db.jp/pokego/data/432*
