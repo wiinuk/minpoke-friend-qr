@@ -186,7 +186,45 @@ async function asyncMain() {
 
         return qrContainerElement;
     }
-    async function appendTrainerCodeUI({ copyButton = true } = {}) {
+    async function appendCodeUI(
+        parentElement: Element,
+        comment: string,
+        copyButton: boolean
+    ) {
+        const codes = unique(getCodes(comment));
+        for (const code of codes) {
+            const idContainerElement = document.createElement("span");
+            idContainerElement.classList.add(idContainerName);
+            if (1 < codes.length) {
+                const numberElement = document.createElement("div");
+                numberElement.innerText = code;
+                numberElement.classList.add(qrNumberName);
+                idContainerElement.appendChild(numberElement);
+            }
+            if (copyButton) {
+                const copyButton = document.createElement("button");
+                copyButton.innerText = `📋`;
+                copyButton.title = `${code} をクリップボードにコピー`;
+                copyButton.type = "button";
+
+                copyButton.addEventListener("click", () => {
+                    handleAsyncError(
+                        (async () => {
+                            await navigator.clipboard.writeText(code);
+                            await toast(
+                                `${code} をクリップボードにコピーしました`
+                            );
+                        })()
+                    );
+                });
+                idContainerElement.appendChild(copyButton);
+            }
+            idContainerElement.appendChild(await createQRElement(code));
+
+            parentElement.appendChild(idContainerElement);
+        }
+    }
+    async function modifyCommentListUI({ copyButton = true } = {}) {
         for (const commentElement of Array.from(
             document.querySelectorAll(".comment")
         )) {
@@ -197,47 +235,16 @@ async function asyncMain() {
                 continue;
             }
             const comment = commentElement.textContent ?? "";
-            const codes = unique(getCodes(comment));
-            for (const code of codes) {
-                const idContainerElement = document.createElement("span");
-                idContainerElement.classList.add(idContainerName);
-                if (1 < codes.length) {
-                    const numberElement = document.createElement("div");
-                    numberElement.innerText = code;
-                    numberElement.classList.add(qrNumberName);
-                    idContainerElement.appendChild(numberElement);
-                }
-                if (copyButton) {
-                    const copyButton = document.createElement("button");
-                    copyButton.innerText = `📋`;
-                    copyButton.title = `${code} をクリップボードにコピー`;
-                    copyButton.type = "button";
-
-                    copyButton.addEventListener("click", () => {
-                        handleAsyncError(
-                            (async () => {
-                                await navigator.clipboard.writeText(code);
-                                await toast(
-                                    `${code} をクリップボードにコピーしました`
-                                );
-                            })()
-                        );
-                    });
-                    idContainerElement.appendChild(copyButton);
-                }
-                idContainerElement.appendChild(await createQRElement(code));
-
-                parentElement.appendChild(idContainerElement);
-            }
+            await appendCodeUI(parentElement, comment, copyButton);
         }
     }
     // フレンド募集掲示板 ( 日本 )
     if (document.URL.match(/https?:\/\/9db.jp\/pokemongo\/data\/4264/)) {
-        await appendTrainerCodeUI({ copyButton: false });
+        await modifyCommentListUI({ copyButton: false });
     }
     // フレンド募集掲示板 ( 海外 )
     else {
-        await appendTrainerCodeUI();
+        await modifyCommentListUI();
     }
 }
 export function main() {
