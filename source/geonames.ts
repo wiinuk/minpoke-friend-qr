@@ -1,8 +1,17 @@
 // spell-checker: ignore geonames
-import { array, enumNumbers, number, or, record, string } from "./json-spec";
+import {
+    and,
+    array,
+    enumNumbers,
+    number,
+    or,
+    record,
+    string,
+} from "./json-spec";
 
 interface RequestOptions {
     signal?: AbortSignal;
+    cache?: RequestCache;
 }
 type RequiredSearchParameters =
     | { q: string }
@@ -59,7 +68,7 @@ const ErrorResponseS = record({
         value: ErrorCodeS,
     }),
 });
-const GeoNameS = record({
+const CommonGeoNameS = record({
     /** @example 2643743 */
     geonameId: number,
 
@@ -73,21 +82,8 @@ const GeoNameS = record({
     /** @example "-0.12574" */
     lng: string,
 
-    /** @example "ENG", "08", "CT" */
-    adminCode1: string,
-    adminCodes1: record({
-        /** @example "ENG", "ON", "EC" */
-        ISO3166_2: string,
-    }),
     /** @example "England", "Ontario", "Eastern Cape" */
     adminName1: string,
-
-    /** @example "2635167" */
-    countryId: string,
-    /** @example "GB", "ZA", "US" */
-    countryCode: string,
-    /** @example "United Kingdom", "Canada", "South Africa" */
-    countryName: string,
 
     /** @example "L", "P" */
     fcl: string,
@@ -102,6 +98,26 @@ const GeoNameS = record({
     /** @example 8961989 */
     population: number,
 });
+const AdminGeoNameS = record({
+    /** @example "ENG", "08", "CT" */
+    adminCode1: string,
+    adminCodes1: record({
+        /** @example "ENG", "ON", "EC" */
+        ISO3166_2: string,
+    }),
+});
+const CountryGeoNameS = record({
+    /** @example "2635167" */
+    countryId: string,
+    /** @example "GB", "ZA", "US" */
+    countryCode: string,
+    /** @example "United Kingdom", "Canada", "South Africa" */
+    countryName: string,
+});
+const GeoNameS = and(
+    CommonGeoNameS,
+    or(AdminGeoNameS, CountryGeoNameS, record({}))
+);
 const SearchSuccessResponseS = record({
     totalResultsCount: number,
     geonames: array(GeoNameS),
@@ -119,7 +135,7 @@ class GeonamesClient {
     constructor(private _userName: string) {}
     async search(
         parameters: Readonly<SearchParameters>,
-        { signal }: Readonly<RequestOptions> = {}
+        { signal, cache = "force-cache" }: Readonly<RequestOptions> = {}
     ) {
         const params = new URLSearchParams({
             username: this._userName,
@@ -133,7 +149,7 @@ class GeonamesClient {
 
         const response = await fetch(
             `https://secure.geonames.org/search?${params.toString()}`,
-            { signal }
+            { signal, cache }
         );
         const result = await response.json();
         searchResultSpec.validate(result);
@@ -144,6 +160,6 @@ class GeonamesClient {
         return result;
     }
 }
-export function createClient(userName: string) {
+export function createGeonamesClient(userName: string) {
     return new GeonamesClient(userName);
 }

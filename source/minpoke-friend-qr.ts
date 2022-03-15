@@ -1,45 +1,34 @@
 /* eslint-disable rulesdir/no-unused-await */
 
 import qrCode from "qrcode";
+import {
+    addStyle,
+    replaceAllTextToElement,
+    waitElementLoaded,
+} from "./document-extensions";
+import { createGeonamesClient } from "./geonames";
 
 function id<T>(x: T) {
     return x;
 }
+function memoize<T, U>(process: (input: T) => U): (input: T) => U {
+    const cache = new Map<T, U>();
+    return (input: T) => {
+        if (cache.has(input)) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            return cache.get(input)!;
+        }
+        const result = process(input);
+        cache.set(input, result);
+        return result;
+    };
+}
+
 function handleAsyncError(promise: Promise<void>) {
     promise.catch((error) => console.error(error));
 }
-function waitElementLoaded() {
-    if (document.readyState !== "loading") {
-        return Promise.resolve();
-    }
-    return new Promise<void>((resolve) =>
-        document.addEventListener("DOMContentLoaded", () => resolve())
-    );
-}
 function sleep(milliseconds: number) {
     return new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
-}
-let styleElement: HTMLStyleElement | null = null;
-function addStyle(css: string): void;
-function addStyle(
-    template: TemplateStringsArray,
-    ...substitutions: unknown[]
-): void;
-function addStyle(
-    cssOrTemplate: TemplateStringsArray | string,
-    ...substitutions: unknown[]
-) {
-    const css =
-        typeof cssOrTemplate === "string"
-            ? cssOrTemplate
-            : String.raw(cssOrTemplate, ...substitutions);
-
-    if (styleElement == null) {
-        styleElement = document.createElement("style");
-        document.head.appendChild(styleElement);
-    }
-    styleElement.textContent += css + "\n";
-    document.head.appendChild(styleElement);
 }
 
 const setCache: Set<unknown>[] = [];
@@ -84,6 +73,30 @@ async function createQRCodeElement(code: string) {
     ) as XMLDocument;
     return document.firstChild as SVGSVGElement;
 }
+
+const geonames = createGeonamesClient("tkxtk");
+interface LocationInfo {
+    countryName: string;
+    countryCode: string;
+}
+async function searchLocationInfoRaw(
+    placeName: string
+): Promise<LocationInfo | undefined> {
+    const result = await geonames.search({
+        q: placeName,
+    });
+    const geoname = result.geonames[0];
+    if (!geoname) {
+        return;
+    }
+    const { countryCode, countryName } = geoname;
+    return {
+        countryName,
+        countryCode,
+    };
+}
+const searchLocationInfoCached = memoize(searchLocationInfoRaw);
+
 async function asyncMain() {
     await waitElementLoaded();
 
@@ -93,6 +106,8 @@ async function asyncMain() {
     const qrCheckboxName = "qr-checkbox";
     const qrLabelName = "qr-label";
     const qrName = "qr";
+    const qrLocationFlagName = "qr-location-flag";
+    const qrLocationName = "qr-location";
     addStyle`
         .${idContainerName} {
             float: right;
@@ -115,6 +130,13 @@ async function asyncMain() {
         }
         .${qrCheckboxName} {
             display: none;
+        }
+        .${qrLocationName} {
+            background: rgb(0 99 223 / 10%);
+        }
+        .${qrLocationFlagName} {
+            width: 1.2em;
+            margin: 0.2em;
         }
         `;
     const toastListName = "qr-toast-list";
@@ -224,6 +246,36 @@ async function asyncMain() {
             parentElement.appendChild(idContainerElement);
         }
     }
+    async function createLocationFlagUI({
+        countryCode,
+        countryName,
+    }: LocationInfo) {
+        const image = document.createElement("img");
+        image.classList.add(qrLocationFlagName);
+        image.src = `https://flagcdn.com/${countryCode.toLowerCase()}.svg`;
+        image.width = 16;
+        image.title = image.alt = countryName;
+        return image;
+    }
+
+    const locationPattern = /(?<=Location\s*[：:]\s*)(.+)(?=\s*)/i;
+    async function insertLocationUI(commentElement: Element) {
+        await replaceAllTextToElement(
+            commentElement,
+            locationPattern,
+            async (locationText) => {
+                const country = (await searchLocationInfoCached(
+                    locationText
+                )) ?? { countryCode: "un", countryName: "unknown country" };
+
+                const span = document.createElement("span");
+                span.classList.add(qrLocationName);
+                span.title = country.countryName;
+                span.append(locationText, await createLocationFlagUI(country));
+                return span;
+            }
+        );
+    }
     async function modifyCommentListUI({ copyButton = true } = {}) {
         for (const commentElement of Array.from(
             document.querySelectorAll(".comment")
@@ -236,6 +288,7 @@ async function asyncMain() {
             }
             const comment = commentElement.textContent ?? "";
             await appendCodeUI(parentElement, comment, copyButton);
+            await insertLocationUI(commentElement);
         }
     }
     // フレンド募集掲示板 ( 日本 )

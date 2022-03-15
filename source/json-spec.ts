@@ -4,6 +4,8 @@ const internalPathCache: MutableObjectPath = [];
 const enum Precedence {
     /** @example `number | string` */
     Or,
+    /** @example `{ x: string } & { y: number }` */
+    And,
     /** @example `number[]` */
     Array,
     /** @example `number`, `{ k: p }`, `(string | null)` */
@@ -228,26 +230,25 @@ type SpecImitation<TSpec extends Spec<unknown>> = TSpec extends Spec<infer T>
 type SpecsImitation<TSpecs extends Spec<unknown>[]> = SpecImitation<
     TSpecs[number]
 >;
-
-class OrSpec<TSpecs extends [Spec<unknown>, ...Spec<unknown>[]]> extends Spec<
+type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
+    k: infer I
+) => void
+    ? I
+    : never;
+type AndSpecsImitation<TSpecs extends Spec<unknown>[]> = UnionToIntersection<
     SpecsImitation<TSpecs>
-> {
+>;
+
+class OrSpec<
+    TSpecs extends [Spec<unknown>, Spec<unknown>, ...Spec<unknown>[]]
+> extends Spec<SpecsImitation<TSpecs>> {
     constructor(private readonly _specs: TSpecs) {
         super();
     }
     override get _internal_typeExpression() {
-        const specs = this._specs;
-        if (specs.length === 1) {
-            return specs[0]._internal_typeExpression;
-        }
-        return specs.map((s) => exprOrWrap(s, Precedence.Or)).join(" | ");
+        return this._specs.map((s) => exprOrWrap(s, Precedence.Or)).join(" | ");
     }
-    override get _internal_typeExpressionPrecedence() {
-        const specs = this._specs;
-        return specs.length === 1
-            ? specs[0]._internal_typeExpressionPrecedence
-            : Precedence.Or;
-    }
+    override _internal_typeExpressionPrecedence = Precedence.Or;
     override _internal_validateCore(value: unknown, path: MutableObjectPath) {
         for (const spec of this._specs) {
             try {
@@ -271,10 +272,99 @@ class OrSpec<TSpecs extends [Spec<unknown>, ...Spec<unknown>[]]> extends Spec<
     }
     override imitation = this._specs[0].imitation as SpecsImitation<TSpecs>;
 }
-export function or<TSpecs extends [Spec<unknown>, ...Spec<unknown>[]]>(
+function isTupleGe2<T>(tuple: T[]): tuple is [T, T, ...T[]] {
+    return 2 <= tuple.length;
+}
+function isTuple1<T>(tuple: T[]): tuple is [T] {
+    return 1 === tuple.length;
+}
+export const never: Spec<never> = new (class NeverSpec extends Spec<never> {
+    constructor() {
+        super();
+    }
+    override get imitation(): never {
+        throw new Error("never");
+    }
+    override _internal_validateCore(value: unknown, path: MutableObjectPath) {
+        throw new ValidationError(
+            showTypeMismatchMessage(
+                this._internal_typeExpression,
+                this._internal_typeExpressionPrecedence,
+                value,
+                path
+            )
+        );
+    }
+    override _internal_typeExpression = "never";
+    override _internal_typeExpressionPrecedence = Precedence.Primary;
+})();
+export const unknown: Spec<unknown> =
+    new (class UnknownSpec extends Spec<unknown> {
+        constructor() {
+            super();
+        }
+        override imitation = "unknown";
+        override _internal_validateCore() {
+            /* unknown すべての値を許可する */
+        }
+        override _internal_typeExpression = "unknown";
+        override _internal_typeExpressionPrecedence = Precedence.Primary;
+    })();
+
+export function or<TSpecs extends Spec<unknown>[]>(
     ...specs: TSpecs
 ): Spec<SpecsImitation<TSpecs>> {
-    return new OrSpec(specs);
+    if (isTupleGe2(specs)) {
+        return new OrSpec(specs);
+    }
+    if (isTuple1(specs)) {
+        return specs[0] as Spec<SpecsImitation<TSpecs>>;
+    }
+    return never;
+}
+class AndSpec<
+    TSpecs extends [Spec<unknown>, Spec<unknown>, ...Spec<unknown>[]]
+> extends Spec<AndSpecsImitation<TSpecs>> {
+    constructor(private readonly _specs: TSpecs) {
+        super();
+    }
+    override _internal_typeExpressionPrecedence = Precedence.And;
+    override get _internal_typeExpression() {
+        return this._specs
+            .map((s) => exprOrWrap(s, Precedence.And))
+            .join(" & ");
+    }
+    override get imitation() {
+        type record = Record<string, unknown>;
+        return this._specs.reduce<record>((result, { imitation }) => {
+            if (imitation !== null && typeof imitation === "object") {
+                return {
+                    ...result,
+                    ...imitation,
+                };
+            }
+            throw new Error("never");
+        }, Object.create(null)) as AndSpecsImitation<TSpecs>;
+    }
+    _internal_validateCore(
+        value: unknown,
+        path: MutableObjectPath
+    ): asserts value is UnionToIntersection<SpecImitation<TSpecs[number]>> {
+        for (const spec of this._specs) {
+            spec._internal_validateCore(value, path);
+        }
+    }
+}
+export function and<TSpecs extends Spec<unknown>[]>(
+    ...specs: TSpecs
+): Spec<AndSpecsImitation<TSpecs>> {
+    if (isTupleGe2(specs)) {
+        return new AndSpec(specs);
+    }
+    if (isTuple1(specs)) {
+        return specs[0] as Spec<AndSpecsImitation<TSpecs>>;
+    }
+    return unknown as Spec<AndSpecsImitation<TSpecs>>;
 }
 export type LiteralKind = undefined | null | boolean | number | string;
 class LiteralSpec<T extends LiteralKind> extends Spec<T> {
