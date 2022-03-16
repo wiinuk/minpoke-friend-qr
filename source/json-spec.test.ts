@@ -6,6 +6,7 @@ import {
     literal,
     array,
     enumNumbers,
+    and,
 } from "./json-spec";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -96,6 +97,61 @@ describe("or.validate (string | number)", () => {
         );
     });
 });
+describe("and.validate ({ x: number } & { y: number })", () => {
+    const Spec_ = record({ x: number }).and(record({ y: number }));
+    const Spec: typeof Spec_ = Spec_;
+
+    it("成功", () => {
+        const x: unknown = { x: 1, y: 2 };
+        Spec.validate(x);
+        assert<eq<typeof x, { x: number } & { y: number }>>();
+    });
+    it("エラー", () => {
+        expect(() => Spec.validate({ x: 1 })).toThrow(/^(?=.*\$)(?=.*"y")/);
+        expect(() => Spec.validate({ y: 2 })).toThrow(/^(?=.*\$)(?=.*"x")/);
+
+        expect(() => Spec.validate(null)).toThrow(
+            /^(?=.*{ x: number })(?=.*\$)(?=.*null)/
+        );
+        expect(() => Spec.validate(true)).toThrow(
+            /^(?=.*{ x: number })(?=.*\$)(?=.*true)/
+        );
+        expect(() => Spec.validate({})).toThrow(/^(?=.*\$)(?=.*"x")/);
+    });
+});
+describe("and,or ({ x: number } & ({ a: number } | { b: number }))", () => {
+    const Spec_ = and(
+        record({ x: number }),
+        or(record({ a: number }), record({ b: number }))
+    );
+    const Spec: typeof Spec_ = Spec_;
+
+    it("成功", () => {
+        const x: unknown = { x: 1, a: 2 };
+        Spec.validate(x);
+        assert<eq<typeof x, { x: number } & ({ a: number } | { b: number })>>();
+    });
+    it("成功2", () => {
+        const x: unknown = { x: 1, b: 2 };
+        Spec.validate(x);
+        assert<eq<typeof x, { x: number } & ({ a: number } | { b: number })>>();
+    });
+    it("エラー", () => {
+        expect(() => Spec.validate({ x: 1 })).toThrow(
+            /^(?=.*\$)(?=.*\({ a: number } | { b: number }\))(?=.*{\s*"x"\s*:\s*1\s*})/
+        );
+        expect(() => Spec.validate({ a: 2 })).toThrow(/^(?=.*\$)(?=.*"x")/);
+        expect(() => Spec.validate({ b: 2 })).toThrow(/^(?=.*\$)(?=.*"x")/);
+
+        expect(() => Spec.validate(null)).toThrow(
+            /^(?=.*{ x: number })(?=.*\$)(?=.*null)/
+        );
+        expect(() => Spec.validate(true)).toThrow(
+            /^(?=.*{ x: number })(?=.*\$)(?=.*true)/
+        );
+        expect(() => Spec.validate({})).toThrow(/^(?=.*\$)(?=.*"x")/);
+    });
+});
 describe("literal.validate 123", () => {
     const Spec_ = literal(123);
     const Spec: typeof Spec_ = Spec_;
@@ -143,5 +199,6 @@ describe("enumNumbers.validate (enum E { A = 1, B = 2 })", () => {
         expect(() => Spec.validate({})).toThrow(
             /^(?=.*1 \| 2)(?=.*\$)(?=.*\{\})/
         );
+        expect(() => Spec.validate(3)).toThrow(/^(?=.*1 \| 2)(?=.*\$)(?=.*3)/);
     });
 });

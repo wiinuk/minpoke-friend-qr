@@ -29,6 +29,19 @@ export abstract class Spec<T> {
             internalPathCache.length = 0;
         }
     }
+    or<TSpecs extends Spec<unknown>[]>(
+        ...specs: TSpecs
+    ): Spec<T | SpecsImitationUnion<TSpecs>> {
+        return or(...[this, ...specs]);
+    }
+    and<TSpecs extends Spec<unknown>[]>(...specs: TSpecs) {
+        return and(...[this, ...specs]) as Spec<
+            T & SpecsImitationIntersection<TSpecs>
+        >;
+    }
+    array(): Spec<T[]> {
+        return array(this);
+    }
 }
 function showObject(value: unknown) {
     return JSON.stringify(value) ?? String(value);
@@ -120,31 +133,34 @@ export const number: Spec<number> = new (class NumberSpec extends Spec<number> {
 })();
 
 export type PropertySpecs<Record> = {
-    [K in keyof Record]: Spec<Record[K]>;
+    readonly [K in keyof Record]: Spec<Record[K]>;
 };
+type RecordKind = Readonly<Record<string, unknown>>;
 
 const hasOwnProperty = Object.prototype.hasOwnProperty;
-class RecordSpec<Record extends { [k: string]: unknown }> extends Spec<Record> {
-    constructor(private readonly _propertySpecs: PropertySpecs<Record>) {
+class RecordSpec<Record extends RecordKind> extends Spec<Record> {
+    private readonly _specs: PropertySpecs<Record>;
+    constructor(specs: PropertySpecs<Record>) {
         super();
+        this._specs = { ...specs };
     }
     override get imitation() {
         const result: Record = Object.create(null);
-        const propertySpecs = this._propertySpecs;
-        for (const key in propertySpecs) {
-            if (hasOwnProperty.call(propertySpecs, key)) {
-                result[key] = propertySpecs[key].imitation;
+        const specs = this._specs;
+        for (const key in specs) {
+            if (hasOwnProperty.call(specs, key)) {
+                result[key] = specs[key].imitation;
             }
         }
         return result;
     }
     override get _internal_typeExpression() {
-        const propertySpecs = this._propertySpecs;
+        const specs = this._specs;
         const properties = [];
-        for (const key in propertySpecs) {
-            if (hasOwnProperty.call(propertySpecs, key)) {
+        for (const key in specs) {
+            if (hasOwnProperty.call(specs, key)) {
                 properties.push(
-                    `${key}: ${propertySpecs[key]._internal_typeExpression}`
+                    `${key}: ${specs[key]._internal_typeExpression}`
                 );
             }
         }
@@ -165,14 +181,14 @@ class RecordSpec<Record extends { [k: string]: unknown }> extends Spec<Record> {
                 )
             );
         }
-        const propertySpecs = this._propertySpecs;
-        for (const key in propertySpecs) {
+        const specs = this._specs;
+        for (const key in specs) {
             if (!(key in value)) {
                 throw new ValidationError(
                     showPropertyNotFoundMessage(key, path)
                 );
             }
-            const x: Spec<unknown> = propertySpecs[key];
+            const x: Spec<unknown> = specs[key];
             path.push(key);
             x._internal_validateCore(
                 (value as { [k: string]: unknown })[key],
@@ -182,7 +198,7 @@ class RecordSpec<Record extends { [k: string]: unknown }> extends Spec<Record> {
         }
     }
 }
-export function record<Record extends { [k: string]: unknown }>(
+export function record<Record extends RecordKind>(
     propertySpecs: PropertySpecs<Record>
 ): Spec<Record> {
     return new RecordSpec(propertySpecs);
@@ -224,24 +240,22 @@ export function array<T>(spec: Spec<T>): Spec<T[]> {
     return new ArraySpec(spec);
 }
 
+type cast<K, T> = T extends K ? T : K;
+type SpecsKind = readonly Spec<unknown>[];
 type SpecImitation<TSpec extends Spec<unknown>> = TSpec extends Spec<infer T>
     ? T
     : never;
-type SpecsImitation<TSpecs extends Spec<unknown>[]> = SpecImitation<
+type SpecsImitationUnion<TSpecs extends SpecsKind> = SpecImitation<
     TSpecs[number]
 >;
-type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
-    k: infer I
-) => void
-    ? I
-    : never;
-type AndSpecsImitation<TSpecs extends Spec<unknown>[]> = UnionToIntersection<
-    SpecsImitation<TSpecs>
->;
+type SpecsImitationIntersection<TSpecs extends SpecsKind> =
+    TSpecs extends readonly [Spec<infer head>, ...infer rest]
+        ? head & SpecsImitationIntersection<cast<SpecsKind, rest>>
+        : unknown;
 
 class OrSpec<
-    TSpecs extends [Spec<unknown>, Spec<unknown>, ...Spec<unknown>[]]
-> extends Spec<SpecsImitation<TSpecs>> {
+    TSpecs extends readonly [Spec<unknown>, Spec<unknown>, ...Spec<unknown>[]]
+> extends Spec<SpecsImitationUnion<TSpecs>> {
     constructor(private readonly _specs: TSpecs) {
         super();
     }
@@ -270,12 +284,13 @@ class OrSpec<
             )
         );
     }
-    override imitation = this._specs[0].imitation as SpecsImitation<TSpecs>;
+    override imitation = this._specs[0]
+        .imitation as SpecsImitationUnion<TSpecs>;
 }
-function isTupleGe2<T>(tuple: T[]): tuple is [T, T, ...T[]] {
+function isTupleGe2<T>(tuple: readonly T[]): tuple is readonly [T, T, ...T[]] {
     return 2 <= tuple.length;
 }
-function isTuple1<T>(tuple: T[]): tuple is [T] {
+function isTuple1<T>(tuple: readonly T[]): tuple is readonly [T] {
     return 1 === tuple.length;
 }
 export const never: Spec<never> = new (class NeverSpec extends Spec<never> {
@@ -313,18 +328,18 @@ export const unknown: Spec<unknown> =
 
 export function or<TSpecs extends Spec<unknown>[]>(
     ...specs: TSpecs
-): Spec<SpecsImitation<TSpecs>> {
+): Spec<SpecsImitationUnion<TSpecs>> {
     if (isTupleGe2(specs)) {
         return new OrSpec(specs);
     }
     if (isTuple1(specs)) {
-        return specs[0] as Spec<SpecsImitation<TSpecs>>;
+        return specs[0] as Spec<SpecsImitationUnion<TSpecs>>;
     }
     return never;
 }
 class AndSpec<
-    TSpecs extends [Spec<unknown>, Spec<unknown>, ...Spec<unknown>[]]
-> extends Spec<AndSpecsImitation<TSpecs>> {
+    TSpecs extends readonly [Spec<unknown>, Spec<unknown>, ...Spec<unknown>[]]
+> extends Spec<SpecsImitationIntersection<TSpecs>> {
     constructor(private readonly _specs: TSpecs) {
         super();
     }
@@ -344,12 +359,12 @@ class AndSpec<
                 };
             }
             throw new Error("never");
-        }, Object.create(null)) as AndSpecsImitation<TSpecs>;
+        }, Object.create(null)) as SpecsImitationIntersection<TSpecs>;
     }
     _internal_validateCore(
         value: unknown,
         path: MutableObjectPath
-    ): asserts value is UnionToIntersection<SpecImitation<TSpecs[number]>> {
+    ): asserts value is SpecsImitationIntersection<TSpecs> {
         for (const spec of this._specs) {
             spec._internal_validateCore(value, path);
         }
@@ -357,23 +372,22 @@ class AndSpec<
 }
 export function and<TSpecs extends Spec<unknown>[]>(
     ...specs: TSpecs
-): Spec<AndSpecsImitation<TSpecs>> {
+): Spec<SpecsImitationIntersection<TSpecs>> {
     if (isTupleGe2(specs)) {
         return new AndSpec(specs);
     }
     if (isTuple1(specs)) {
-        return specs[0] as Spec<AndSpecsImitation<TSpecs>>;
+        return specs[0] as Spec<SpecsImitationIntersection<TSpecs>>;
     }
-    return unknown as Spec<AndSpecsImitation<TSpecs>>;
+    return unknown as Spec<SpecsImitationIntersection<TSpecs>>;
 }
 export type LiteralKind = undefined | null | boolean | number | string;
 class LiteralSpec<T extends LiteralKind> extends Spec<T> {
-    constructor(private readonly _value: T) {
+    constructor(override imitation: T) {
         super();
     }
-    override imitation = this._value;
     override get _internal_typeExpression() {
-        return JSON.stringify(this._value);
+        return JSON.stringify(this.imitation);
     }
     override _internal_typeExpressionPrecedence = Precedence.Primary;
     override _internal_validateCore(value: unknown, path: MutableObjectPath) {
@@ -396,14 +410,13 @@ function isNonEmpty<T>(array: T[]): array is [T, ...T[]] {
     return 0 < array.length;
 }
 type Values<T> = T[keyof T];
-type EnumNumbersImitation<TEnumParent extends { [name: string]: unknown }> =
-    Values<{
-        [k in keyof TEnumParent as number extends k
-            ? never
-            : k]: TEnumParent[k];
-    }>;
+type EnumNumbersImitation<
+    TEnumParent extends { readonly [name: string]: unknown }
+> = Values<{
+    [k in keyof TEnumParent as number extends k ? never : k]: TEnumParent[k];
+}>;
 export function enumNumbers<
-    EnumParent extends { [name: string | number]: string | number }
+    EnumParent extends { readonly [name: string | number]: string | number }
 >(parent: EnumParent): Spec<EnumNumbersImitation<EnumParent>> {
     const literalSpecs: Spec<number>[] = [];
     for (const k of Object.keys(parent)) {
