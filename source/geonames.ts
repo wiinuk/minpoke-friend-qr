@@ -1,7 +1,6 @@
 // spell-checker: ignore geonames
 import {
-    and,
-    array,
+    emptyRecord,
     enumNumbers,
     number,
     or,
@@ -114,13 +113,12 @@ const CountryGeoNameS = record({
     /** @example "United Kingdom", "Canada", "South Africa" */
     countryName: string,
 });
-const GeoNameS = and(
-    CommonGeoNameS,
-    or(AdminGeoNameS, CountryGeoNameS, record({}))
+const GeoNameS = CommonGeoNameS.and(
+    or(AdminGeoNameS, CountryGeoNameS, emptyRecord)
 );
 const SearchSuccessResponseS = record({
     totalResultsCount: number,
-    geonames: array(GeoNameS),
+    geonames: GeoNameS.array(),
 });
 const SearchResultS = or(SearchSuccessResponseS, ErrorResponseS);
 const searchResultSpec: typeof SearchResultS = SearchResultS;
