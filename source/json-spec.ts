@@ -203,6 +203,40 @@ export function record<Record extends RecordKind>(
 ): Spec<Record> {
     return new RecordSpec(propertySpecs);
 }
+export const emptyRecord: Spec<Record<string, undefined>> =
+    new (class EmptyRecordSpec extends Spec<Record<string, undefined>> {
+        override imitation = Object.freeze({});
+        _internal_validateCore(
+            value: unknown,
+            path: MutableObjectPath
+        ): asserts value is Record<string, undefined> {
+            if (typeof value !== "object" || value === null) {
+                throw new ValidationError(
+                    showTypeMismatchMessage(
+                        this._internal_typeExpression,
+                        this._internal_typeExpressionPrecedence,
+                        value,
+                        path
+                    )
+                );
+            }
+            for (const k in value) {
+                if ((value as Record<string, undefined>)[k] !== undefined) {
+                    throw new ValidationError(
+                        showTypeMismatchMessage(
+                            this._internal_typeExpression,
+                            this._internal_typeExpressionPrecedence,
+                            value,
+                            path
+                        )
+                    );
+                }
+            }
+        }
+        override _internal_typeExpression = "Record<string, undefined>";
+        override _internal_typeExpressionPrecedence = Precedence.Primary;
+    })();
+
 class ArraySpec<T> extends Spec<T[]> {
     constructor(private readonly _elementSpec: Spec<T>) {
         super();
