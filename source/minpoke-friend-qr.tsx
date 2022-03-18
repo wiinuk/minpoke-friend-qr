@@ -173,32 +173,29 @@ async function asyncMain() {
             box-shadow: 0 2px 2px rgb(0 0 0 / 50%);
         }
     `;
-    const toastListElement = document.createElement("ul");
-    toastListElement.classList.add(toastListName);
+    const toastListElement = <ul class={toastListName} />;
     document.body.appendChild(toastListElement);
     async function toast(message: string, { timeout = 3000 } = {}) {
-        const item = document.createElement("li");
-        item.innerText = message;
-        item.classList.add(toastItemName);
+        const item = <li class={toastItemName}>{message}</li>;
         toastListElement.insertBefore(item, toastListElement.firstElementChild);
         await sleep(timeout);
         item.parentElement?.removeChild(item);
     }
     let nextCheckboxId = 0;
     async function createQRElement(code: string) {
-        const qrContainerElement = document.createElement("span");
-        qrContainerElement.classList.add(qrContainerName);
-        qrContainerElement.title = "QR コードを表示";
-
-        const checkboxId = `qr-checkbox-${nextCheckboxId++}`;
-        qrContainerElement.innerHTML = `
-        <input type="checkbox" class="${qrCheckboxName}" id="${checkboxId}" />
-        <label type="button" class="${qrLabelName}" for="${checkboxId}">QR 📸</label>
-    `;
-
         const qrCodeElement = await createQRCodeElement(code);
         qrCodeElement.classList.add(qrName);
-        qrContainerElement.appendChild(qrCodeElement);
+
+        const checkboxId = `qr-checkbox-${nextCheckboxId++}`;
+        const qrContainerElement = (
+            <span class={qrContainerName} title="QR コードを表示">
+                <input type="checkbox" class={qrCheckboxName} id={checkboxId} />
+                <label class={qrLabelName} for={checkboxId}>
+                    QR 📸
+                </label>
+                {qrCodeElement}
+            </span>
+        );
         qrContainerElement
             .querySelector("input")
             ?.addEventListener("click", function () {
@@ -216,6 +213,22 @@ async function asyncMain() {
 
         return qrContainerElement;
     }
+    function createCodeCopyButton(code: string) {
+        const copyButton = (
+            <button type="button" title={`${code} をクリップボードにコピー`}>
+                📋
+            </button>
+        );
+        copyButton.addEventListener("click", () => {
+            handleAsyncError(
+                (async () => {
+                    await navigator.clipboard.writeText(code);
+                    await toast(`${code} をクリップボードにコピーしました`);
+                })()
+            );
+        });
+        return copyButton;
+    }
     async function appendCodeUI(
         parentElement: Element,
         comment: string,
@@ -223,79 +236,30 @@ async function asyncMain() {
     ) {
         const codes = unique(getCodes(comment));
         for (const code of codes) {
-            const idContainerElement = document.createElement("span");
-            idContainerElement.classList.add(idContainerName);
-            if (1 < codes.length) {
-                const numberElement = document.createElement("div");
-                numberElement.innerText = code;
-                numberElement.classList.add(qrNumberName);
-                idContainerElement.appendChild(numberElement);
-            }
-            if (copyButton) {
-                const copyButton = document.createElement("button");
-                copyButton.innerText = `📋`;
-                copyButton.title = `${code} をクリップボードにコピー`;
-                copyButton.type = "button";
-
-                copyButton.addEventListener("click", () => {
-                    handleAsyncError(
-                        (async () => {
-                            await navigator.clipboard.writeText(code);
-                            await toast(
-                                `${code} をクリップボードにコピーしました`
-                            );
-                        })()
-                    );
-                });
-                idContainerElement.appendChild(copyButton);
-            }
-            idContainerElement.appendChild(await createQRElement(code));
-
-            parentElement.appendChild(idContainerElement);
+            parentElement.appendChild(
+                <span class={idContainerName}>
+                    {1 < codes.length && <div class={qrNumberName}>{code}</div>}
+                    {copyButton && createCodeCopyButton(code)}
+                    {await createQRElement(code)}
+                </span>
+            );
         }
     }
-
-    interface LocationSearchResult extends LocationInfo {
-        /** 元のコメントを切り出した文字列 */
-        sourceText: string;
-        /** 検索した文字列 */
-        searchText: string;
-    }
-    async function createFlagUI({
-        sourceText,
-        searchText,
-        countryCode,
-        countryName,
-    }: LocationSearchResult) {
-        const image = document.createElement("img");
-        image.classList.add(qrLocationFlagName);
-        image.src = `https://flagcdn.com/${countryCode.toLowerCase()}.svg`;
-        image.width = 16;
-        image.title =
-            sourceText !== searchText
-                ? `${searchText} ⇒ ${countryName}`
-                : countryName;
-        image.alt = countryName;
-        return image;
-    }
-
     const locationPattern = /(?<=Location\s*[：:]\s*)(.+)(?=\s*)/i;
     async function insertLocationUI(commentElement: Element) {
         await replaceAllTextToElement(
             commentElement,
             locationPattern,
             async (sourceText) => {
-                const country = (await searchLocationInfoHeuristic(
-                    sourceText
-                )) ?? {
+                const country = await searchLocationInfoHeuristic(sourceText);
+                const { searchText, countryCode, countryName } = country ?? {
                     searchText: sourceText,
                     countryCode: "un",
                     countryName: "unknown country",
                 };
-                const { searchText } = country;
 
                 // 元の文字列の中の `searchText` を選択する
-                let selectIndex = sourceText.indexOf(country.searchText);
+                let selectIndex = sourceText.indexOf(searchText);
                 let selectLength = searchText.length;
                 // 見つからない場合は最初から最後までを選択する
                 if (selectIndex < 0) {
@@ -310,7 +274,17 @@ async function asyncMain() {
                                 selectIndex,
                                 selectIndex + selectLength
                             )}
-                            {await createFlagUI({ ...country, sourceText })}
+                            <img
+                                class={qrLocationFlagName}
+                                src={`https://flagcdn.com/${countryCode.toLowerCase()}.svg`}
+                                width={16}
+                                title={
+                                    sourceText !== searchText
+                                        ? `${searchText} ⇒ ${countryName}`
+                                        : countryName
+                                }
+                                alt={countryName}
+                            />
                         </span>
                         {sourceText.substring(selectIndex + selectLength)}
                     </span>
@@ -319,19 +293,23 @@ async function asyncMain() {
         );
     }
     async function modifyCommentListUI({ copyButton = true } = {}) {
-        for (const commentElement of Array.from(
-            document.querySelectorAll(".comment")
-        )) {
-            const parentElement =
-                commentElement.parentElement?.querySelector(".header > .left");
-            if (parentElement == null) {
-                console.error("親要素が見つかりませんでした。");
-                continue;
-            }
-            const comment = commentElement.textContent ?? "";
-            await appendCodeUI(parentElement, comment, copyButton);
-            await insertLocationUI(commentElement);
-        }
+        await Promise.all(
+            Array.from(document.querySelectorAll(".comment")).map(
+                async (commentElement) => {
+                    const parentElement =
+                        commentElement.parentElement?.querySelector(
+                            ".header > .left"
+                        );
+                    if (parentElement == null) {
+                        console.error("親要素が見つかりませんでした。");
+                        return;
+                    }
+                    const comment = commentElement.textContent ?? "";
+                    await appendCodeUI(parentElement, comment, copyButton);
+                    await insertLocationUI(commentElement);
+                }
+            )
+        );
     }
     // フレンド募集掲示板 ( 日本 )
     if (document.URL.match(/https?:\/\/9db.jp\/pokemongo\/data\/4264/)) {
