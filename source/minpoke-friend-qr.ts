@@ -12,19 +12,6 @@ import { createGeonamesClient } from "./geonames";
 function id<T>(x: T) {
     return x;
 }
-function memoize<T, U>(process: (input: T) => U): (input: T) => U {
-    const cache = new Map<T, U>();
-    return (input: T) => {
-        if (cache.has(input)) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            return cache.get(input)!;
-        }
-        const result = process(input);
-        cache.set(input, result);
-        return result;
-    };
-}
-
 function handleAsyncError(promise: Promise<void>) {
     promise.catch((error) => console.error(error));
 }

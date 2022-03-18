@@ -5,7 +5,7 @@
 // @downloadURL  https://github.com/wiinuk/minpoke-friend-qr/raw/master/minpoke-friend-qr.user.js
 // @updateURL    https://github.com/wiinuk/minpoke-friend-qr/raw/master/minpoke-friend-qr.user.js
 // @homepageURL  https://github.com/wiinuk/minpoke-friend-qr
-// @version      0.2.3
+// @version      0.3.0
 // @description  Add QR code to friend list
 // @author       Wiinuk
 // @match        https://9db.jp/pokego/data/432*
@@ -3083,15 +3083,77 @@ var __webpack_exports__ = {};
 (() => {
 "use strict";
 
-// EXTERNAL MODULE: ./node_modules/qrcode/lib/browser.js
-var browser = __webpack_require__(592);
-;// CONCATENATED MODULE: ./source/minpoke-friend-qr.ts
-/* eslint-disable rulesdir/no-unused-await */
-var __makeTemplateObject = (undefined && undefined.__makeTemplateObject) || function (cooked, raw) {
-    if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
-    return cooked;
+;// CONCATENATED MODULE: ./node_modules/tslib/tslib.es6.js
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+***************************************************************************** */
+/* global Reflect, Promise */
+
+var extendStatics = function(d, b) {
+    extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+    return extendStatics(d, b);
 };
-var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+
+function __extends(d, b) {
+    if (typeof b !== "function" && b !== null)
+        throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+    extendStatics(d, b);
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+
+var __assign = function() {
+    __assign = Object.assign || function __assign(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+        }
+        return t;
+    }
+    return __assign.apply(this, arguments);
+}
+
+function __rest(s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+}
+
+function __decorate(decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+}
+
+function __param(paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+}
+
+function __metadata(metadataKey, metadataValue) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
+}
+
+function __awaiter(thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -3099,8 +3161,9 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
         function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-};
-var __generator = (undefined && undefined.__generator) || function (thisArg, body) {
+}
+
+function __generator(thisArg, body) {
     var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
     return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
@@ -3126,8 +3189,33 @@ var __generator = (undefined && undefined.__generator) || function (thisArg, bod
         } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
-};
-var __read = (undefined && undefined.__read) || function (o, n) {
+}
+
+var __createBinding = Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+});
+
+function __exportStar(m, o) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(o, p)) __createBinding(o, m, p);
+}
+
+function __values(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+}
+
+function __read(o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
     if (!m) return o;
     var i = m.call(o), r, ar = [], e;
@@ -3142,8 +3230,25 @@ var __read = (undefined && undefined.__read) || function (o, n) {
         finally { if (e) throw e.error; }
     }
     return ar;
-};
-var __spreadArray = (undefined && undefined.__spreadArray) || function (to, from, pack) {
+}
+
+/** @deprecated */
+function __spread() {
+    for (var ar = [], i = 0; i < arguments.length; i++)
+        ar = ar.concat(__read(arguments[i]));
+    return ar;
+}
+
+/** @deprecated */
+function __spreadArrays() {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+}
+
+function __spreadArray(to, from, pack) {
     if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
         if (ar || !(i in from)) {
             if (!ar) ar = Array.prototype.slice.call(from, 0, i);
@@ -3151,25 +3256,78 @@ var __spreadArray = (undefined && undefined.__spreadArray) || function (to, from
         }
     }
     return to.concat(ar || Array.prototype.slice.call(from));
-};
-var __values = (undefined && undefined.__values) || function(o) {
-    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
-    if (m) return m.call(o);
-    if (o && typeof o.length === "number") return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
-        }
-    };
-    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+}
+
+function __await(v) {
+    return this instanceof __await ? (this.v = v, this) : new __await(v);
+}
+
+function __asyncGenerator(thisArg, _arguments, generator) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var g = generator.apply(thisArg, _arguments || []), i, q = [];
+    return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i;
+    function verb(n) { if (g[n]) i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; }
+    function resume(n, v) { try { step(g[n](v)); } catch (e) { settle(q[0][3], e); } }
+    function step(r) { r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r); }
+    function fulfill(value) { resume("next", value); }
+    function reject(value) { resume("throw", value); }
+    function settle(f, v) { if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]); }
+}
+
+function __asyncDelegator(o) {
+    var i, p;
+    return i = {}, verb("next"), verb("throw", function (e) { throw e; }), verb("return"), i[Symbol.iterator] = function () { return this; }, i;
+    function verb(n, f) { i[n] = o[n] ? function (v) { return (p = !p) ? { value: __await(o[n](v)), done: n === "return" } : f ? f(v) : v; } : f; }
+}
+
+function __asyncValues(o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+}
+
+function __makeTemplateObject(cooked, raw) {
+    if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
+    return cooked;
 };
 
-function id(x) {
-    return x;
+var __setModuleDefault = Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+};
+
+function __importStar(mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 }
-function handleAsyncError(promise) {
-    promise.catch(function (error) { return console.error(error); });
+
+function __importDefault(mod) {
+    return (mod && mod.__esModule) ? mod : { default: mod };
 }
+
+function __classPrivateFieldGet(receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+}
+
+function __classPrivateFieldSet(receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+}
+
+// EXTERNAL MODULE: ./node_modules/qrcode/lib/browser.js
+var browser = __webpack_require__(592);
+;// CONCATENATED MODULE: ./source/document-extensions.ts
+
 function waitElementLoaded() {
     if (document.readyState !== "loading") {
         return Promise.resolve();
@@ -3177,9 +3335,6 @@ function waitElementLoaded() {
     return new Promise(function (resolve) {
         return document.addEventListener("DOMContentLoaded", function () { return resolve(); });
     });
-}
-function sleep(milliseconds) {
-    return new Promise(function (resolve) { return setTimeout(resolve, milliseconds); });
 }
 var styleElement = null;
 function addStyle(cssOrTemplate) {
@@ -3196,6 +3351,662 @@ function addStyle(cssOrTemplate) {
     }
     styleElement.textContent += css + "\n";
     document.head.appendChild(styleElement);
+}
+function replaceAllTextToElement(element, pattern, matchedTextToElement) {
+    return __awaiter(this, void 0, void 0, function () {
+        function replaceNode(node) {
+            var _a;
+            return __awaiter(this, void 0, void 0, function () {
+                var parent, contents, match, index, _b, length_1, before_1, newElement, after_1;
+                return __generator(this, function (_c) {
+                    switch (_c.label) {
+                        case 0:
+                            parent = node.parentElement;
+                            if (!(node.nodeType === Node.TEXT_NODE && parent)) return [3 /*break*/, 4];
+                            contents = (_a = node.textContent) !== null && _a !== void 0 ? _a : "";
+                            match = contents.match(pattern);
+                            if (!(match && match.index !== undefined && match[0] !== undefined)) return [3 /*break*/, 3];
+                            index = match.index;
+                            _b = __read(match, 1), length_1 = _b[0].length;
+                            before_1 = document.createTextNode(contents.substring(0, index));
+                            return [4 /*yield*/, matchedTextToElement(contents.substring(index, index + length_1))];
+                        case 1:
+                            newElement = _c.sent();
+                            after_1 = document.createTextNode(contents.substring(index + length_1));
+                            parent.insertBefore(before_1, node);
+                            parent.insertBefore(newElement, node);
+                            parent.insertBefore(after_1, node);
+                            parent.removeChild(node);
+                            return [4 /*yield*/, replaceNode(after_1)];
+                        case 2:
+                            _c.sent();
+                            _c.label = 3;
+                        case 3: return [3 /*break*/, 5];
+                        case 4:
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                node.childNodes.forEach(replaceNode);
+                            }
+                            _c.label = 5;
+                        case 5: return [2 /*return*/, node];
+                    }
+                });
+            });
+        }
+        return __generator(this, function (_a) {
+            element.childNodes.forEach(replaceNode);
+            return [2 /*return*/, element];
+        });
+    });
+}
+function createElement(name, attributes) {
+    var e_1, _a;
+    var children = [];
+    for (var _i = 2; _i < arguments.length; _i++) {
+        children[_i - 2] = arguments[_i];
+    }
+    var element = document.createElement(name);
+    try {
+        for (var _b = __values(Object.entries(attributes !== null && attributes !== void 0 ? attributes : {})), _c = _b.next(); !_c.done; _c = _b.next()) {
+            var _d = __read(_c.value, 2), key = _d[0], value = _d[1];
+            element.setAttribute(key, String(value));
+        }
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+        }
+        finally { if (e_1) throw e_1.error; }
+    }
+    element.append.apply(element, __spreadArray([], __read(children), false));
+    return element;
+}
+
+;// CONCATENATED MODULE: ./source/json-spec.ts
+
+var internalPathCache = [];
+var Spec = /** @class */ (function () {
+    function Spec() {
+    }
+    Spec.prototype.validate = function (value) {
+        try {
+            this._internal_validateCore(value, internalPathCache);
+        }
+        finally {
+            internalPathCache.length = 0;
+        }
+    };
+    Spec.prototype.or = function () {
+        var specs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            specs[_i] = arguments[_i];
+        }
+        return or.apply(void 0, __spreadArray([], __read(__spreadArray([this], __read(specs), false)), false));
+    };
+    Spec.prototype.and = function () {
+        var specs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            specs[_i] = arguments[_i];
+        }
+        return and.apply(void 0, __spreadArray([], __read(__spreadArray([this], __read(specs), false)), false));
+    };
+    Spec.prototype.array = function () {
+        return array(this);
+    };
+    return Spec;
+}());
+
+function showObject(value) {
+    var _a;
+    return (_a = JSON.stringify(value)) !== null && _a !== void 0 ? _a : String(value);
+}
+function showFullObjectPath(path) {
+    var e_1, _a;
+    var result = "$";
+    try {
+        for (var path_1 = __values(path), path_1_1 = path_1.next(); !path_1_1.done; path_1_1 = path_1.next()) {
+            var x = path_1_1.value;
+            result += "." + String(x);
+        }
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (path_1_1 && !path_1_1.done && (_a = path_1.return)) _a.call(path_1);
+        }
+        finally { if (e_1) throw e_1.error; }
+    }
+    return result;
+}
+function exprOrWrapRaw(expr, exprPrecedence, minPrecedence) {
+    return exprPrecedence < minPrecedence ? "(".concat(expr, ")") : expr;
+}
+function exprOrWrap(s, minPrecedence) {
+    return exprOrWrapRaw(s._internal_typeExpression, s._internal_typeExpressionPrecedence, minPrecedence);
+}
+function showTypeMismatchMessage(expectedType, typePrecedence, actualValue, path) {
+    return "Expected ".concat(exprOrWrapRaw(expectedType, typePrecedence, 2 /* Array */), ". actual: ").concat(showObject(actualValue), ". at: ").concat(showFullObjectPath(path));
+}
+function showPropertyNotFoundMessage(expectedKey, path) {
+    return "Expected property \"".concat(expectedKey, "\". at: ").concat(showFullObjectPath(path));
+}
+var ValidationError = /** @class */ (function (_super) {
+    __extends(ValidationError, _super);
+    function ValidationError(message) {
+        var _this = _super.call(this, message) || this;
+        _this.name = ValidationError.name;
+        return _this;
+    }
+    return ValidationError;
+}(Error));
+var string = new (/** @class */ (function (_super) {
+    __extends(StringSpec, _super);
+    function StringSpec() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this._internal_typeExpression = "string";
+        _this._internal_typeExpressionPrecedence = 3 /* Primary */;
+        _this.imitation = "";
+        return _this;
+    }
+    StringSpec.prototype._internal_validateCore = function (value, path) {
+        if (typeof value !== "string") {
+            throw new ValidationError(showTypeMismatchMessage(this._internal_typeExpression, this._internal_typeExpressionPrecedence, value, path));
+        }
+    };
+    return StringSpec;
+}(Spec)))();
+var number = new (/** @class */ (function (_super) {
+    __extends(NumberSpec, _super);
+    function NumberSpec() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this._internal_typeExpression = "number";
+        _this._internal_typeExpressionPrecedence = 3 /* Primary */;
+        _this.imitation = 0;
+        return _this;
+    }
+    NumberSpec.prototype._internal_validateCore = function (value, path) {
+        if (typeof value !== "number") {
+            throw new ValidationError(showTypeMismatchMessage(this._internal_typeExpression, this._internal_typeExpressionPrecedence, value, path));
+        }
+    };
+    return NumberSpec;
+}(Spec)))();
+var json_spec_hasOwnProperty = Object.prototype.hasOwnProperty;
+var RecordSpec = /** @class */ (function (_super) {
+    __extends(RecordSpec, _super);
+    function RecordSpec(specs) {
+        var _this = _super.call(this) || this;
+        _this._internal_typeExpressionPrecedence = 3 /* Primary */;
+        _this._specs = __assign({}, specs);
+        return _this;
+    }
+    Object.defineProperty(RecordSpec.prototype, "imitation", {
+        get: function () {
+            var result = Object.create(null);
+            var specs = this._specs;
+            for (var key in specs) {
+                if (json_spec_hasOwnProperty.call(specs, key)) {
+                    result[key] = specs[key].imitation;
+                }
+            }
+            return result;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(RecordSpec.prototype, "_internal_typeExpression", {
+        get: function () {
+            var specs = this._specs;
+            var properties = [];
+            for (var key in specs) {
+                if (json_spec_hasOwnProperty.call(specs, key)) {
+                    properties.push("".concat(key, ": ").concat(specs[key]._internal_typeExpression));
+                }
+            }
+            return "{ ".concat(properties.join(", "), " }");
+        },
+        enumerable: false,
+        configurable: true
+    });
+    RecordSpec.prototype._internal_validateCore = function (value, path) {
+        if (typeof value !== "object" || value === null) {
+            throw new ValidationError(showTypeMismatchMessage(this._internal_typeExpression, this._internal_typeExpressionPrecedence, value, path));
+        }
+        var specs = this._specs;
+        for (var key in specs) {
+            if (!(key in value)) {
+                throw new ValidationError(showPropertyNotFoundMessage(key, path));
+            }
+            var x = specs[key];
+            path.push(key);
+            x._internal_validateCore(value[key], path);
+            path.pop();
+        }
+    };
+    return RecordSpec;
+}(Spec));
+function record(propertySpecs) {
+    return new RecordSpec(propertySpecs);
+}
+var object = new (/** @class */ (function (_super) {
+    __extends(ObjectSpec, _super);
+    function ObjectSpec() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.imitation = Object.freeze({});
+        _this._internal_typeExpression = "object";
+        _this._internal_typeExpressionPrecedence = 3 /* Primary */;
+        return _this;
+    }
+    ObjectSpec.prototype._internal_validateCore = function (value, path) {
+        if (typeof value !== "object" || value === null) {
+            throw new ValidationError(showTypeMismatchMessage(this._internal_typeExpression, this._internal_typeExpressionPrecedence, value, path));
+        }
+    };
+    return ObjectSpec;
+}(Spec)))();
+var ArraySpec = /** @class */ (function (_super) {
+    __extends(ArraySpec, _super);
+    function ArraySpec(_elementSpec) {
+        var _this = _super.call(this) || this;
+        _this._elementSpec = _elementSpec;
+        _this._internal_typeExpressionPrecedence = 2 /* Array */;
+        return _this;
+    }
+    Object.defineProperty(ArraySpec.prototype, "imitation", {
+        get: function () {
+            return [];
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(ArraySpec.prototype, "_internal_typeExpression", {
+        get: function () {
+            return "".concat(exprOrWrap(this._elementSpec, 2 /* Array */), "[]");
+        },
+        enumerable: false,
+        configurable: true
+    });
+    ArraySpec.prototype._internal_validateCore = function (value, path) {
+        if (!Array.isArray(value)) {
+            throw new ValidationError(showTypeMismatchMessage(this._internal_typeExpression, this._internal_typeExpressionPrecedence, value, path));
+        }
+        var elementSpec = this._elementSpec;
+        for (var i = 0; i < value.length; i++) {
+            path.push(i);
+            elementSpec._internal_validateCore(value[i], path);
+            path.pop();
+        }
+    };
+    return ArraySpec;
+}(Spec));
+function array(spec) {
+    return new ArraySpec(spec);
+}
+var OrSpec = /** @class */ (function (_super) {
+    __extends(OrSpec, _super);
+    function OrSpec(_specs) {
+        var _this = _super.call(this) || this;
+        _this._specs = _specs;
+        _this._internal_typeExpressionPrecedence = 0 /* Or */;
+        _this.imitation = _this._specs[0]
+            .imitation;
+        return _this;
+    }
+    Object.defineProperty(OrSpec.prototype, "_internal_typeExpression", {
+        get: function () {
+            return this._specs.map(function (s) { return exprOrWrap(s, 0 /* Or */); }).join(" | ");
+        },
+        enumerable: false,
+        configurable: true
+    });
+    OrSpec.prototype._internal_validateCore = function (value, path) {
+        var e_2, _a;
+        try {
+            for (var _b = __values(this._specs), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var spec = _c.value;
+                try {
+                    spec._internal_validateCore(value, path);
+                    return;
+                }
+                catch (e) {
+                    if (e instanceof Error && e.name === ValidationError.name) {
+                        continue;
+                    }
+                    throw e;
+                }
+            }
+        }
+        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            }
+            finally { if (e_2) throw e_2.error; }
+        }
+        throw new ValidationError(showTypeMismatchMessage(this._internal_typeExpression, this._internal_typeExpressionPrecedence, value, path));
+    };
+    return OrSpec;
+}(Spec));
+function isTupleGe2(tuple) {
+    return 2 <= tuple.length;
+}
+function isTuple1(tuple) {
+    return 1 === tuple.length;
+}
+var never = new (/** @class */ (function (_super) {
+    __extends(NeverSpec, _super);
+    function NeverSpec() {
+        var _this = _super.call(this) || this;
+        _this._internal_typeExpression = "never";
+        _this._internal_typeExpressionPrecedence = 3 /* Primary */;
+        return _this;
+    }
+    Object.defineProperty(NeverSpec.prototype, "imitation", {
+        get: function () {
+            throw new Error("never");
+        },
+        enumerable: false,
+        configurable: true
+    });
+    NeverSpec.prototype._internal_validateCore = function (value, path) {
+        throw new ValidationError(showTypeMismatchMessage(this._internal_typeExpression, this._internal_typeExpressionPrecedence, value, path));
+    };
+    return NeverSpec;
+}(Spec)))();
+var unknown = new (/** @class */ (function (_super) {
+    __extends(UnknownSpec, _super);
+    function UnknownSpec() {
+        var _this = _super.call(this) || this;
+        _this.imitation = "unknown";
+        _this._internal_typeExpression = "unknown";
+        _this._internal_typeExpressionPrecedence = 3 /* Primary */;
+        return _this;
+    }
+    UnknownSpec.prototype._internal_validateCore = function () {
+        /* unknown すべての値を許可する */
+    };
+    return UnknownSpec;
+}(Spec)))();
+function or() {
+    var specs = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        specs[_i] = arguments[_i];
+    }
+    if (isTupleGe2(specs)) {
+        return new OrSpec(specs);
+    }
+    if (isTuple1(specs)) {
+        return specs[0];
+    }
+    return never;
+}
+var AndSpec = /** @class */ (function (_super) {
+    __extends(AndSpec, _super);
+    function AndSpec(_specs) {
+        var _this = _super.call(this) || this;
+        _this._specs = _specs;
+        _this._internal_typeExpressionPrecedence = 1 /* And */;
+        return _this;
+    }
+    Object.defineProperty(AndSpec.prototype, "_internal_typeExpression", {
+        get: function () {
+            return this._specs
+                .map(function (s) { return exprOrWrap(s, 1 /* And */); })
+                .join(" & ");
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(AndSpec.prototype, "imitation", {
+        get: function () {
+            return this._specs.reduce(function (result, _a) {
+                var imitation = _a.imitation;
+                if (imitation !== null && typeof imitation === "object") {
+                    return __assign(__assign({}, result), imitation);
+                }
+                throw new Error("never");
+            }, Object.create(null));
+        },
+        enumerable: false,
+        configurable: true
+    });
+    AndSpec.prototype._internal_validateCore = function (value, path) {
+        var e_3, _a;
+        try {
+            for (var _b = __values(this._specs), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var spec = _c.value;
+                spec._internal_validateCore(value, path);
+            }
+        }
+        catch (e_3_1) { e_3 = { error: e_3_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            }
+            finally { if (e_3) throw e_3.error; }
+        }
+    };
+    return AndSpec;
+}(Spec));
+function and() {
+    var specs = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        specs[_i] = arguments[_i];
+    }
+    if (isTupleGe2(specs)) {
+        return new AndSpec(specs);
+    }
+    if (isTuple1(specs)) {
+        return specs[0];
+    }
+    return unknown;
+}
+var LiteralSpec = /** @class */ (function (_super) {
+    __extends(LiteralSpec, _super);
+    function LiteralSpec(imitation) {
+        var _this = _super.call(this) || this;
+        _this.imitation = imitation;
+        _this._internal_typeExpressionPrecedence = 3 /* Primary */;
+        return _this;
+    }
+    Object.defineProperty(LiteralSpec.prototype, "_internal_typeExpression", {
+        get: function () {
+            return JSON.stringify(this.imitation);
+        },
+        enumerable: false,
+        configurable: true
+    });
+    LiteralSpec.prototype._internal_validateCore = function (value, path) {
+        if (value !== this.imitation) {
+            throw new ValidationError(showTypeMismatchMessage(this._internal_typeExpression, this._internal_typeExpressionPrecedence, value, path));
+        }
+    };
+    return LiteralSpec;
+}(Spec));
+function literal(value) {
+    return new LiteralSpec(value);
+}
+function isNonEmpty(array) {
+    return 0 < array.length;
+}
+function enumNumbers(parent) {
+    var e_4, _a;
+    var literalSpecs = [];
+    try {
+        for (var _b = __values(Object.keys(parent)), _c = _b.next(); !_c.done; _c = _b.next()) {
+            var k = _c.value;
+            var value = parent[k];
+            if (typeof value === "number") {
+                literalSpecs.push(literal(value));
+            }
+        }
+    }
+    catch (e_4_1) { e_4 = { error: e_4_1 }; }
+    finally {
+        try {
+            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+        }
+        finally { if (e_4) throw e_4.error; }
+    }
+    if (!isNonEmpty(literalSpecs)) {
+        throw new Error("no enum values");
+    }
+    return or.apply(void 0, __spreadArray([], __read(literalSpecs), false));
+}
+
+;// CONCATENATED MODULE: ./source/geonames.ts
+
+// spell-checker: ignore geonames
+
+var ErrorCode;
+(function (ErrorCode) {
+    ErrorCode[ErrorCode["Authorization_Exception"] = 10] = "Authorization_Exception";
+    ErrorCode[ErrorCode["record_does_not_exist"] = 11] = "record_does_not_exist";
+    ErrorCode[ErrorCode["other_error"] = 12] = "other_error";
+    ErrorCode[ErrorCode["database_timeout"] = 13] = "database_timeout";
+    ErrorCode[ErrorCode["invalid_parameter"] = 14] = "invalid_parameter";
+    ErrorCode[ErrorCode["no_result_found"] = 15] = "no_result_found";
+    ErrorCode[ErrorCode["duplicate_exception"] = 16] = "duplicate_exception";
+    ErrorCode[ErrorCode["postal_code_not_found"] = 17] = "postal_code_not_found";
+    ErrorCode[ErrorCode["daily_limit_of_credits_exceeded"] = 18] = "daily_limit_of_credits_exceeded";
+    ErrorCode[ErrorCode["hourly_limit_of_credits_exceeded"] = 19] = "hourly_limit_of_credits_exceeded";
+    ErrorCode[ErrorCode["weekly_limit_of_credits_exceeded"] = 20] = "weekly_limit_of_credits_exceeded";
+    ErrorCode[ErrorCode["invalid_input"] = 21] = "invalid_input";
+    ErrorCode[ErrorCode["server_overloaded_exception"] = 22] = "server_overloaded_exception";
+    ErrorCode[ErrorCode["service_not_implemented"] = 23] = "service_not_implemented";
+    ErrorCode[ErrorCode["radius_too_large"] = 24] = "radius_too_large";
+    ErrorCode[ErrorCode["maxRows_too_large"] = 27] = "maxRows_too_large";
+})(ErrorCode || (ErrorCode = {}));
+var ErrorCodeS = enumNumbers(ErrorCode);
+var ErrorResponseS = record({
+    status: record({
+        message: string,
+        value: ErrorCodeS,
+    }),
+});
+var CommonGeoNameS = record({
+    /** @example 2643743 */
+    geonameId: number,
+    /** @example "London", "New London", "Norwich" */
+    name: string,
+    /** @example "London", "New London", "Norwich" */
+    toponymName: string,
+    /** @example "51.50853" */
+    lat: string,
+    /** @example "-0.12574" */
+    lng: string,
+    /** @example "England", "Ontario", "Eastern Cape" */
+    adminName1: string,
+    /** @example "L", "P" */
+    fcl: string,
+    /** @example "city, village,...", "parks,area, ..." */
+    fclName: string,
+    /** @example "RGN", "PPL" */
+    fcode: string,
+    /** @example "region", "capital of a political entity", "populated place", "seat of a second-order administrative division" */
+    fcodeName: string,
+    /** @example 8961989 */
+    population: number,
+});
+var AdminGeoNameS = record({
+    /** @example "ENG", "08", "CT" */
+    adminCode1: string,
+    adminCodes1: record({
+        /** @example "ENG", "ON", "EC" */
+        ISO3166_2: string,
+    }),
+});
+var CountryGeoNameS = record({
+    /** @example "2635167" */
+    countryId: string,
+    /** @example "GB", "ZA", "US" */
+    countryCode: string,
+    /** @example "United Kingdom", "Canada", "South Africa" */
+    countryName: string,
+});
+var GeoNameS = CommonGeoNameS.and(or(AdminGeoNameS, CountryGeoNameS, object));
+var SearchSuccessResponseS = record({
+    totalResultsCount: number,
+    geonames: GeoNameS.array(),
+});
+var SearchResultS = or(SearchSuccessResponseS, ErrorResponseS);
+var searchResultSpec = SearchResultS;
+var ResponseError = /** @class */ (function (_super) {
+    __extends(ResponseError, _super);
+    function ResponseError(message, code) {
+        var _this = _super.call(this, message) || this;
+        _this.code = code;
+        _this.name = ResponseError.name;
+        return _this;
+    }
+    return ResponseError;
+}(Error));
+var GeonamesClient = /** @class */ (function () {
+    function GeonamesClient(_userName) {
+        this._userName = _userName;
+    }
+    GeonamesClient.prototype.search = function (parameters, _a) {
+        var _b = _a === void 0 ? {} : _a, signal = _b.signal, _c = _b.cache, cache = _c === void 0 ? "force-cache" : _c;
+        return __awaiter(this, void 0, void 0, function () {
+            var params, _d, _e, k, anyParameters, response, result;
+            var e_1, _f;
+            return __generator(this, function (_g) {
+                switch (_g.label) {
+                    case 0:
+                        params = new URLSearchParams({
+                            username: this._userName,
+                            maxRows: String(10),
+                        });
+                        try {
+                            for (_d = __values(Object.keys(parameters)), _e = _d.next(); !_e.done; _e = _d.next()) {
+                                k = _e.value;
+                                anyParameters = parameters;
+                                params.set(k, String(anyParameters[k]));
+                            }
+                        }
+                        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                        finally {
+                            try {
+                                if (_e && !_e.done && (_f = _d.return)) _f.call(_d);
+                            }
+                            finally { if (e_1) throw e_1.error; }
+                        }
+                        params.set("type", "json");
+                        return [4 /*yield*/, fetch("https://secure.geonames.org/search?".concat(params.toString()), { signal: signal, cache: cache })];
+                    case 1:
+                        response = _g.sent();
+                        return [4 /*yield*/, response.json()];
+                    case 2:
+                        result = _g.sent();
+                        searchResultSpec.validate(result);
+                        if ("status" in result) {
+                            throw new ResponseError(result.status.message, result.status.value);
+                        }
+                        return [2 /*return*/, result];
+                }
+            });
+        });
+    };
+    return GeonamesClient;
+}());
+function createGeonamesClient(userName) {
+    return new GeonamesClient(userName);
+}
+
+;// CONCATENATED MODULE: ./source/minpoke-friend-qr.ts
+/* eslint-disable rulesdir/no-unused-await */
+
+
+
+
+function id(x) {
+    return x;
+}
+function handleAsyncError(promise) {
+    promise.catch(function (error) { return console.error(error); });
+}
+function sleep(milliseconds) {
+    return new Promise(function (resolve) { return setTimeout(resolve, milliseconds); });
 }
 var setCache = [];
 function unique(array, getKey) {
@@ -3246,6 +4057,103 @@ function createQRCodeElement(code) {
                     svgContents = _a.sent();
                     document = (domParser !== null && domParser !== void 0 ? domParser : (domParser = new DOMParser())).parseFromString(svgContents, "image/svg+xml");
                     return [2 /*return*/, document.firstChild];
+            }
+        });
+    });
+}
+var geonames = createGeonamesClient("tkxtk");
+function searchLocationInfo(query) {
+    return __awaiter(this, void 0, void 0, function () {
+        var result, _a, _b, geoname, countryCode, countryName;
+        var e_2, _c;
+        return __generator(this, function (_d) {
+            switch (_d.label) {
+                case 0: return [4 /*yield*/, geonames.search({
+                        q: query,
+                    })];
+                case 1:
+                    result = _d.sent();
+                    try {
+                        for (_a = __values(result.geonames), _b = _a.next(); !_b.done; _b = _a.next()) {
+                            geoname = _b.value;
+                            if (!("countryCode" in geoname))
+                                return [2 /*return*/];
+                            countryCode = geoname.countryCode, countryName = geoname.countryName;
+                            if (countryCode == null || countryName == null)
+                                return [2 /*return*/];
+                            return [2 /*return*/, { countryCode: countryCode, countryName: countryName }];
+                        }
+                    }
+                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                    finally {
+                        try {
+                            if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
+                        }
+                        finally { if (e_2) throw e_2.error; }
+                    }
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function getHeuristicLocationTexts(originalText) {
+    var tokenPattern, tokens, i;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, originalText];
+            case 1:
+                _a.sent();
+                tokenPattern = /[\p{L}\p{N}\p{Mc}\p{Mn}\p{Pc}\p{Cf}]+/gu;
+                tokens = __spreadArray([], __read(originalText.matchAll(tokenPattern)), false);
+                i = tokens.length;
+                _a.label = 2;
+            case 2:
+                if (!(1 <= i)) return [3 /*break*/, 5];
+                return [4 /*yield*/, tokens.slice(0, i).join(" ")];
+            case 3:
+                _a.sent();
+                _a.label = 4;
+            case 4:
+                i--;
+                return [3 /*break*/, 2];
+            case 5: return [2 /*return*/];
+        }
+    });
+}
+function searchLocationInfoHeuristic(locationText) {
+    return __awaiter(this, void 0, void 0, function () {
+        var _a, _b, searchText, info, e_3_1;
+        var e_3, _c;
+        return __generator(this, function (_d) {
+            switch (_d.label) {
+                case 0:
+                    _d.trys.push([0, 5, 6, 7]);
+                    _a = __values(getHeuristicLocationTexts(locationText)), _b = _a.next();
+                    _d.label = 1;
+                case 1:
+                    if (!!_b.done) return [3 /*break*/, 4];
+                    searchText = _b.value;
+                    return [4 /*yield*/, searchLocationInfo(searchText)];
+                case 2:
+                    info = _d.sent();
+                    if (info)
+                        return [2 /*return*/, __assign(__assign({}, info), { searchText: searchText })];
+                    _d.label = 3;
+                case 3:
+                    _b = _a.next();
+                    return [3 /*break*/, 1];
+                case 4: return [3 /*break*/, 7];
+                case 5:
+                    e_3_1 = _d.sent();
+                    e_3 = { error: e_3_1 };
+                    return [3 /*break*/, 7];
+                case 6:
+                    try {
+                        if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
+                    }
+                    finally { if (e_3) throw e_3.error; }
+                    return [7 /*endfinally*/];
+                case 7: return [2 /*return*/];
             }
         });
     });
@@ -3309,33 +4217,19 @@ function asyncMain() {
                 });
             });
         }
-        function appendTrainerCodeUI(_a) {
-            var _b, _c;
-            var _d = _a === void 0 ? {} : _a, _e = _d.copyButton, copyButton = _e === void 0 ? true : _e;
+        function appendCodeUI(parentElement, comment, copyButton) {
             return __awaiter(this, void 0, void 0, function () {
-                var _f, _g, commentElement, parentElement, comment, codes, _loop_1, codes_1, codes_1_1, code, e_2_1, e_3_1;
-                var e_3, _h, e_2, _j;
+                var codes, _loop_1, codes_1, codes_1_1, code, e_4_1;
+                var e_4, _a;
                 var _this = this;
-                return __generator(this, function (_k) {
-                    switch (_k.label) {
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
                         case 0:
-                            _k.trys.push([0, 11, 12, 13]);
-                            _f = __values(Array.from(document.querySelectorAll(".comment"))), _g = _f.next();
-                            _k.label = 1;
-                        case 1:
-                            if (!!_g.done) return [3 /*break*/, 10];
-                            commentElement = _g.value;
-                            parentElement = (_b = commentElement.parentElement) === null || _b === void 0 ? void 0 : _b.querySelector(".header > .left");
-                            if (parentElement == null) {
-                                console.error("親要素が見つかりませんでした。");
-                                return [3 /*break*/, 9];
-                            }
-                            comment = (_c = commentElement.textContent) !== null && _c !== void 0 ? _c : "";
                             codes = unique(getCodes(comment));
                             _loop_1 = function (code) {
-                                var idContainerElement, numberElement, copyButton_1, _l, _m;
-                                return __generator(this, function (_o) {
-                                    switch (_o.label) {
+                                var idContainerElement, numberElement, copyButton_1, _c, _d;
+                                return __generator(this, function (_e) {
+                                    switch (_e.label) {
                                         case 0:
                                             idContainerElement = document.createElement("span");
                                             idContainerElement.classList.add(idContainerName);
@@ -3367,61 +4261,158 @@ function asyncMain() {
                                                 });
                                                 idContainerElement.appendChild(copyButton_1);
                                             }
-                                            _m = (_l = idContainerElement).appendChild;
+                                            _d = (_c = idContainerElement).appendChild;
                                             return [4 /*yield*/, createQRElement(code)];
                                         case 1:
-                                            _m.apply(_l, [_o.sent()]);
+                                            _d.apply(_c, [_e.sent()]);
                                             parentElement.appendChild(idContainerElement);
                                             return [2 /*return*/];
                                     }
                                 });
                             };
-                            _k.label = 2;
+                            _b.label = 1;
+                        case 1:
+                            _b.trys.push([1, 6, 7, 8]);
+                            codes_1 = __values(codes), codes_1_1 = codes_1.next();
+                            _b.label = 2;
                         case 2:
-                            _k.trys.push([2, 7, 8, 9]);
-                            codes_1 = (e_2 = void 0, __values(codes)), codes_1_1 = codes_1.next();
-                            _k.label = 3;
-                        case 3:
-                            if (!!codes_1_1.done) return [3 /*break*/, 6];
+                            if (!!codes_1_1.done) return [3 /*break*/, 5];
                             code = codes_1_1.value;
                             return [5 /*yield**/, _loop_1(code)];
+                        case 3:
+                            _b.sent();
+                            _b.label = 4;
                         case 4:
-                            _k.sent();
-                            _k.label = 5;
-                        case 5:
                             codes_1_1 = codes_1.next();
-                            return [3 /*break*/, 3];
-                        case 6: return [3 /*break*/, 9];
+                            return [3 /*break*/, 2];
+                        case 5: return [3 /*break*/, 8];
+                        case 6:
+                            e_4_1 = _b.sent();
+                            e_4 = { error: e_4_1 };
+                            return [3 /*break*/, 8];
                         case 7:
-                            e_2_1 = _k.sent();
-                            e_2 = { error: e_2_1 };
-                            return [3 /*break*/, 9];
-                        case 8:
                             try {
-                                if (codes_1_1 && !codes_1_1.done && (_j = codes_1.return)) _j.call(codes_1);
+                                if (codes_1_1 && !codes_1_1.done && (_a = codes_1.return)) _a.call(codes_1);
                             }
-                            finally { if (e_2) throw e_2.error; }
+                            finally { if (e_4) throw e_4.error; }
                             return [7 /*endfinally*/];
-                        case 9:
-                            _g = _f.next();
-                            return [3 /*break*/, 1];
-                        case 10: return [3 /*break*/, 13];
-                        case 11:
-                            e_3_1 = _k.sent();
-                            e_3 = { error: e_3_1 };
-                            return [3 /*break*/, 13];
-                        case 12:
-                            try {
-                                if (_g && !_g.done && (_h = _f.return)) _h.call(_f);
-                            }
-                            finally { if (e_3) throw e_3.error; }
-                            return [7 /*endfinally*/];
-                        case 13: return [2 /*return*/];
+                        case 8: return [2 /*return*/];
                     }
                 });
             });
         }
-        var idContainerName, qrNumberName, qrContainerName, qrCheckboxName, qrLabelName, qrName, toastListName, toastItemName, toastListElement, nextCheckboxId;
+        function createFlagUI(_a) {
+            var sourceText = _a.sourceText, searchText = _a.searchText, countryCode = _a.countryCode, countryName = _a.countryName;
+            return __awaiter(this, void 0, void 0, function () {
+                var image;
+                return __generator(this, function (_b) {
+                    image = document.createElement("img");
+                    image.classList.add(qrLocationFlagName);
+                    image.src = "https://flagcdn.com/".concat(countryCode.toLowerCase(), ".svg");
+                    image.width = 16;
+                    image.title =
+                        sourceText !== searchText
+                            ? "".concat(searchText, " \u21D2 ").concat(countryName)
+                            : countryName;
+                    image.alt = countryName;
+                    return [2 /*return*/, image];
+                });
+            });
+        }
+        function insertLocationUI(commentElement) {
+            return __awaiter(this, void 0, void 0, function () {
+                var _this = this;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, replaceAllTextToElement(commentElement, locationPattern, function (sourceText) { return __awaiter(_this, void 0, void 0, function () {
+                                var country, searchText, selectIndex, selectLength, _a, _b, _c, _d;
+                                var _e;
+                                return __generator(this, function (_f) {
+                                    switch (_f.label) {
+                                        case 0: return [4 /*yield*/, searchLocationInfoHeuristic(sourceText)];
+                                        case 1:
+                                            country = (_e = (_f.sent())) !== null && _e !== void 0 ? _e : {
+                                                searchText: sourceText,
+                                                countryCode: "un",
+                                                countryName: "unknown country",
+                                            };
+                                            searchText = country.searchText;
+                                            selectIndex = sourceText.indexOf(country.searchText);
+                                            selectLength = searchText.length;
+                                            // 見つからない場合は最初から最後までを選択する
+                                            if (selectIndex < 0) {
+                                                selectIndex = 0;
+                                                selectLength = sourceText.length;
+                                            }
+                                            _a = createElement;
+                                            _b = ["span",
+                                                null,
+                                                sourceText.substring(0, selectIndex)];
+                                            _c = createElement;
+                                            _d = ["span",
+                                                { class: qrLocationName },
+                                                sourceText.substring(selectIndex, selectIndex + selectLength)];
+                                            return [4 /*yield*/, createFlagUI(__assign(__assign({}, country), { sourceText: sourceText }))];
+                                        case 2: return [2 /*return*/, _a.apply(void 0, _b.concat([_c.apply(void 0, _d.concat([_f.sent()])),
+                                                sourceText.substring(selectIndex + selectLength)]))];
+                                    }
+                                });
+                            }); })];
+                        case 1:
+                            _a.sent();
+                            return [2 /*return*/];
+                    }
+                });
+            });
+        }
+        function modifyCommentListUI(_a) {
+            var _b, _c;
+            var _d = _a === void 0 ? {} : _a, _e = _d.copyButton, copyButton = _e === void 0 ? true : _e;
+            return __awaiter(this, void 0, void 0, function () {
+                var _f, _g, commentElement, parentElement, comment, e_5_1;
+                var e_5, _h;
+                return __generator(this, function (_j) {
+                    switch (_j.label) {
+                        case 0:
+                            _j.trys.push([0, 6, 7, 8]);
+                            _f = __values(Array.from(document.querySelectorAll(".comment"))), _g = _f.next();
+                            _j.label = 1;
+                        case 1:
+                            if (!!_g.done) return [3 /*break*/, 5];
+                            commentElement = _g.value;
+                            parentElement = (_b = commentElement.parentElement) === null || _b === void 0 ? void 0 : _b.querySelector(".header > .left");
+                            if (parentElement == null) {
+                                console.error("親要素が見つかりませんでした。");
+                                return [3 /*break*/, 4];
+                            }
+                            comment = (_c = commentElement.textContent) !== null && _c !== void 0 ? _c : "";
+                            return [4 /*yield*/, appendCodeUI(parentElement, comment, copyButton)];
+                        case 2:
+                            _j.sent();
+                            return [4 /*yield*/, insertLocationUI(commentElement)];
+                        case 3:
+                            _j.sent();
+                            _j.label = 4;
+                        case 4:
+                            _g = _f.next();
+                            return [3 /*break*/, 1];
+                        case 5: return [3 /*break*/, 8];
+                        case 6:
+                            e_5_1 = _j.sent();
+                            e_5 = { error: e_5_1 };
+                            return [3 /*break*/, 8];
+                        case 7:
+                            try {
+                                if (_g && !_g.done && (_h = _f.return)) _h.call(_f);
+                            }
+                            finally { if (e_5) throw e_5.error; }
+                            return [7 /*endfinally*/];
+                        case 8: return [2 /*return*/];
+                    }
+                });
+            });
+        }
+        var idContainerName, qrNumberName, qrContainerName, qrCheckboxName, qrLabelName, qrName, qrLocationFlagName, qrLocationName, toastListName, toastItemName, toastListElement, nextCheckboxId, locationPattern;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, waitElementLoaded()];
@@ -3433,7 +4424,9 @@ function asyncMain() {
                     qrCheckboxName = "qr-checkbox";
                     qrLabelName = "qr-label";
                     qrName = "qr";
-                    addStyle(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n        .", " {\n            float: right;\n            display: flex;\n            padding: 0;\n            margin: 0 0.5em;\n            border: 2px solid #ddd;\n        }\n        .", " {\n            padding: 0 0.5em;\n            border-right: 2px dashed #ddd;\n        }\n        .", " {\n            width: 0;\n            height: 0;\n        }\n        .", ":checked + .", " + .", " {\n            width: 5em;\n            height: 5em;\n        }\n        .", " {\n            display: none;\n        }\n        "], ["\n        .", " {\n            float: right;\n            display: flex;\n            padding: 0;\n            margin: 0 0.5em;\n            border: 2px solid #ddd;\n        }\n        .", " {\n            padding: 0 0.5em;\n            border-right: 2px dashed #ddd;\n        }\n        .", " {\n            width: 0;\n            height: 0;\n        }\n        .", ":checked + .", " + .", " {\n            width: 5em;\n            height: 5em;\n        }\n        .", " {\n            display: none;\n        }\n        "])), idContainerName, qrNumberName, qrName, qrCheckboxName, qrLabelName, qrName, qrCheckboxName);
+                    qrLocationFlagName = "qr-location-flag";
+                    qrLocationName = "qr-location";
+                    addStyle(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n        .", " {\n            float: right;\n            display: flex;\n            padding: 0;\n            margin: 0 0.5em;\n            border: 2px solid #ddd;\n        }\n        .", " {\n            padding: 0 0.5em;\n            border-right: 2px dashed #ddd;\n        }\n        .", " {\n            width: 0;\n            height: 0;\n        }\n        .", ":checked + .", " + .", " {\n            width: 5em;\n            height: 5em;\n        }\n        .", " {\n            display: none;\n        }\n        .", " {\n            background: rgb(0 99 223 / 10%);\n        }\n        .", " {\n            width: 1.2em;\n            margin: 0.2em;\n        }\n        "], ["\n        .", " {\n            float: right;\n            display: flex;\n            padding: 0;\n            margin: 0 0.5em;\n            border: 2px solid #ddd;\n        }\n        .", " {\n            padding: 0 0.5em;\n            border-right: 2px dashed #ddd;\n        }\n        .", " {\n            width: 0;\n            height: 0;\n        }\n        .", ":checked + .", " + .", " {\n            width: 5em;\n            height: 5em;\n        }\n        .", " {\n            display: none;\n        }\n        .", " {\n            background: rgb(0 99 223 / 10%);\n        }\n        .", " {\n            width: 1.2em;\n            margin: 0.2em;\n        }\n        "])), idContainerName, qrNumberName, qrName, qrCheckboxName, qrLabelName, qrName, qrCheckboxName, qrLocationName, qrLocationFlagName);
                     toastListName = "qr-toast-list";
                     toastItemName = "qr-toast-item";
                     addStyle(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n        .", " {\n            position: fixed;\n            right: 0;\n            bottom: 0;\n            z-index: 9999;\n            list-style: none;\n            padding: 0;\n            margin: 0;\n        }\n        .", ":first-of-type {\n            border-top: 1px solid #ddd;\n        }\n        .", " {\n            background-color: white;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            border-top: 1px dashed #ccc;\n            margin: 0 0.5em;\n            padding: 1em;\n            box-shadow: 0 2px 2px rgb(0 0 0 / 50%);\n        }\n    "], ["\n        .", " {\n            position: fixed;\n            right: 0;\n            bottom: 0;\n            z-index: 9999;\n            list-style: none;\n            padding: 0;\n            margin: 0;\n        }\n        .", ":first-of-type {\n            border-top: 1px solid #ddd;\n        }\n        .", " {\n            background-color: white;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            border-top: 1px dashed #ccc;\n            margin: 0 0.5em;\n            padding: 1em;\n            box-shadow: 0 2px 2px rgb(0 0 0 / 50%);\n        }\n    "])), toastListName, toastItemName, toastItemName);
@@ -3441,12 +4434,13 @@ function asyncMain() {
                     toastListElement.classList.add(toastListName);
                     document.body.appendChild(toastListElement);
                     nextCheckboxId = 0;
+                    locationPattern = /(?<=Location\s*[：:]\s*)(.+)(?=\s*)/i;
                     if (!document.URL.match(/https?:\/\/9db.jp\/pokemongo\/data\/4264/)) return [3 /*break*/, 3];
-                    return [4 /*yield*/, appendTrainerCodeUI({ copyButton: false })];
+                    return [4 /*yield*/, modifyCommentListUI({ copyButton: false })];
                 case 2:
                     _a.sent();
                     return [3 /*break*/, 5];
-                case 3: return [4 /*yield*/, appendTrainerCodeUI()];
+                case 3: return [4 /*yield*/, modifyCommentListUI()];
                 case 4:
                     _a.sent();
                     _a.label = 5;
