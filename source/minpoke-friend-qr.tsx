@@ -62,13 +62,7 @@ async function createQRCodeElement(code: string) {
 }
 
 const geonames = createGeonamesClient("tkxtk");
-interface LocationInfo {
-    countryName: string;
-    countryCode: string;
-}
-async function searchLocationInfo(
-    query: string
-): Promise<LocationInfo | undefined> {
+async function searchLocationInfo(query: string) {
     const result = await geonames.search({
         q: query,
     });
@@ -245,53 +239,47 @@ async function asyncMain() {
             );
         }
     }
-    const locationPattern = /(?<=Location\s*[：:]\s*)(.+)(?=\s*)/i;
-    async function insertLocationUI(commentElement: Element) {
-        await replaceAllTextToElement(
-            commentElement,
-            locationPattern,
-            async (sourceText) => {
-                const country = await searchLocationInfoHeuristic(sourceText);
-                const { searchText, countryCode, countryName } = country ?? {
-                    searchText: sourceText,
-                    countryCode: "un",
-                    countryName: "unknown country",
-                };
+    async function createLocationUI(sourceText: string) {
+        const country = await searchLocationInfoHeuristic(sourceText);
+        const { searchText, countryCode, countryName } = country ?? {
+            searchText: sourceText,
+            countryCode: "un",
+            countryName: "unknown country",
+        };
 
-                // 元の文字列の中の `searchText` を選択する
-                let selectIndex = sourceText.indexOf(searchText);
-                let selectLength = searchText.length;
-                // 見つからない場合は最初から最後までを選択する
-                if (selectIndex < 0) {
-                    selectIndex = 0;
-                    selectLength = sourceText.length;
-                }
-                return (
-                    <span>
-                        {sourceText.substring(0, selectIndex)}
-                        <span class={qrLocationName}>
-                            {sourceText.substring(
-                                selectIndex,
-                                selectIndex + selectLength
-                            )}
-                            <img
-                                class={qrLocationFlagName}
-                                src={`https://flagcdn.com/${countryCode.toLowerCase()}.svg`}
-                                width={16}
-                                title={
-                                    sourceText !== searchText
-                                        ? `${searchText} ⇒ ${countryName}`
-                                        : countryName
-                                }
-                                alt={countryName}
-                            />
-                        </span>
-                        {sourceText.substring(selectIndex + selectLength)}
-                    </span>
-                );
-            }
+        // 元の文字列の中の `searchText` を選択する
+        let selectIndex = sourceText.indexOf(searchText);
+        let selectLength = searchText.length;
+        // 見つからない場合は最初から最後までを選択する
+        if (selectIndex < 0) {
+            selectIndex = 0;
+            selectLength = sourceText.length;
+        }
+        return (
+            <span>
+                {sourceText.substring(0, selectIndex)}
+                <span class={qrLocationName}>
+                    {sourceText.substring(
+                        selectIndex,
+                        selectIndex + selectLength
+                    )}
+                    <img
+                        class={qrLocationFlagName}
+                        src={`https://flagcdn.com/${countryCode.toLowerCase()}.svg`}
+                        width={16}
+                        title={
+                            sourceText !== searchText
+                                ? `${searchText} ⇒ ${countryName}`
+                                : countryName
+                        }
+                        alt={countryName}
+                    />
+                </span>
+                {sourceText.substring(selectIndex + selectLength)}
+            </span>
         );
     }
+    const locationPattern = /(?<=Location\s*[：:]\s*)(.+)(?=\s*)/i;
     async function modifyCommentListUI({ copyButton = true } = {}) {
         await Promise.all(
             Array.from(document.querySelectorAll(".comment")).map(
@@ -306,7 +294,11 @@ async function asyncMain() {
                     }
                     const comment = commentElement.textContent ?? "";
                     await appendCodeUI(parentElement, comment, copyButton);
-                    await insertLocationUI(commentElement);
+                    await replaceAllTextToElement(
+                        commentElement,
+                        locationPattern,
+                        createLocationUI
+                    );
                 }
             )
         );
