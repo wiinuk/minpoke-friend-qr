@@ -18,7 +18,7 @@ const config = {
         ],
     },
     resolve: {
-        extensions: [".ts", ".js"],
+        extensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
     },
     optimization: {
         minimize: false,

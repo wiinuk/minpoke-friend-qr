@@ -3,7 +3,6 @@
 import qrCode from "qrcode";
 import {
     addStyle,
-    createElement,
     replaceAllTextToElement,
     waitElementLoaded,
 } from "./document-extensions";
@@ -303,20 +302,18 @@ async function asyncMain() {
                     selectIndex = 0;
                     selectLength = sourceText.length;
                 }
-                return createElement(
-                    "span",
-                    null,
-                    sourceText.substring(0, selectIndex),
-                    createElement(
-                        "span",
-                        { class: qrLocationName },
-                        sourceText.substring(
-                            selectIndex,
-                            selectIndex + selectLength
-                        ),
-                        await createFlagUI({ ...country, sourceText })
-                    ),
-                    sourceText.substring(selectIndex + selectLength)
+                return (
+                    <span>
+                        {sourceText.substring(0, selectIndex)}
+                        <span class={qrLocationName}>
+                            {sourceText.substring(
+                                selectIndex,
+                                selectIndex + selectLength
+                            )}
+                            {await createFlagUI({ ...country, sourceText })}
+                        </span>
+                        {sourceText.substring(selectIndex + selectLength)}
+                    </span>
                 );
             }
         );
