@@ -1,12 +1,5 @@
 // spell-checker: ignore geonames
-import {
-    emptyRecord,
-    enumNumbers,
-    number,
-    or,
-    record,
-    string,
-} from "./json-spec";
+import { enumNumbers, number, object, or, record, string } from "./json-spec";
 
 interface RequestOptions {
     signal?: AbortSignal;
@@ -113,9 +106,7 @@ const CountryGeoNameS = record({
     /** @example "United Kingdom", "Canada", "South Africa" */
     countryName: string,
 });
-const GeoNameS = CommonGeoNameS.and(
-    or(AdminGeoNameS, CountryGeoNameS, emptyRecord)
-);
+const GeoNameS = CommonGeoNameS.and(or(AdminGeoNameS, CountryGeoNameS, object));
 const SearchSuccessResponseS = record({
     totalResultsCount: number,
     geonames: GeoNameS.array(),

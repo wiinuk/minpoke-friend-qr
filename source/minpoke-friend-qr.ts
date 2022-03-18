@@ -3,6 +3,7 @@
 import qrCode from "qrcode";
 import {
     addStyle,
+    createElement,
     replaceAllTextToElement,
     waitElementLoaded,
 } from "./document-extensions";
@@ -79,23 +80,44 @@ interface LocationInfo {
     countryName: string;
     countryCode: string;
 }
-async function searchLocationInfoRaw(
-    placeName: string
+async function searchLocationInfo(
+    query: string
 ): Promise<LocationInfo | undefined> {
     const result = await geonames.search({
-        q: placeName,
+        q: query,
     });
-    const geoname = result.geonames[0];
-    if (!geoname) {
-        return;
+    for (const geoname of result.geonames) {
+        if (!("countryCode" in geoname)) return;
+
+        const { countryCode, countryName } = geoname;
+        if (countryCode == null || countryName == null) return;
+
+        return { countryCode, countryName };
     }
-    const { countryCode, countryName } = geoname;
-    return {
-        countryName,
-        countryCode,
-    };
+    return;
 }
-const searchLocationInfoCached = memoize(searchLocationInfoRaw);
+export function* getHeuristicLocationTexts(originalText: string) {
+    yield originalText;
+    /**
+     * L: letter
+     * N: number
+     * Mc: spacing combining mark
+     * Mn: non-spacing mark
+     * Pc: connector punctuation
+     * Cf: format other
+     */
+    const tokenPattern = /[\p{L}\p{N}\p{Mc}\p{Mn}\p{Pc}\p{Cf}]+/gu;
+    const tokens = [...originalText.matchAll(tokenPattern)];
+    for (let i = tokens.length; 1 <= i; i--) {
+        yield tokens.slice(0, i).join(" ");
+    }
+}
+async function searchLocationInfoHeuristic(locationText: string) {
+    for (const searchText of getHeuristicLocationTexts(locationText)) {
+        const info = await searchLocationInfo(searchText);
+        if (info) return { ...info, searchText };
+    }
+}
 
 async function asyncMain() {
     await waitElementLoaded();
@@ -246,15 +268,28 @@ async function asyncMain() {
             parentElement.appendChild(idContainerElement);
         }
     }
-    async function createLocationFlagUI({
+
+    interface LocationSearchResult extends LocationInfo {
+        /** 元のコメントを切り出した文字列 */
+        sourceText: string;
+        /** 検索した文字列 */
+        searchText: string;
+    }
+    async function createFlagUI({
+        sourceText,
+        searchText,
         countryCode,
         countryName,
-    }: LocationInfo) {
+    }: LocationSearchResult) {
         const image = document.createElement("img");
         image.classList.add(qrLocationFlagName);
         image.src = `https://flagcdn.com/${countryCode.toLowerCase()}.svg`;
         image.width = 16;
-        image.title = image.alt = countryName;
+        image.title =
+            sourceText !== searchText
+                ? `${searchText} ⇒ ${countryName}`
+                : countryName;
+        image.alt = countryName;
         return image;
     }
 
@@ -263,16 +298,39 @@ async function asyncMain() {
         await replaceAllTextToElement(
             commentElement,
             locationPattern,
-            async (locationText) => {
-                const country = (await searchLocationInfoCached(
-                    locationText
-                )) ?? { countryCode: "un", countryName: "unknown country" };
+            async (sourceText) => {
+                const country = (await searchLocationInfoHeuristic(
+                    sourceText
+                )) ?? {
+                    searchText: sourceText,
+                    countryCode: "un",
+                    countryName: "unknown country",
+                };
+                const { searchText } = country;
 
-                const span = document.createElement("span");
-                span.classList.add(qrLocationName);
-                span.title = country.countryName;
-                span.append(locationText, await createLocationFlagUI(country));
-                return span;
+                // 元の文字列の中の `searchText` を選択する
+                let selectIndex = sourceText.indexOf(country.searchText);
+                let selectLength = searchText.length;
+                // 見つからない場合は最初から最後までを選択する
+                if (selectIndex < 0) {
+                    selectIndex = 0;
+                    selectLength = sourceText.length;
+                }
+                return createElement(
+                    "span",
+                    null,
+                    sourceText.substring(0, selectIndex),
+                    createElement(
+                        "span",
+                        { class: qrLocationName },
+                        sourceText.substring(
+                            selectIndex,
+                            selectIndex + selectLength
+                        ),
+                        await createFlagUI({ ...country, sourceText })
+                    ),
+                    sourceText.substring(selectIndex + selectLength)
+                );
             }
         );
     }

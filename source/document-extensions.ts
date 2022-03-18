@@ -68,3 +68,39 @@ export async function replaceAllTextToElement(
     element.childNodes.forEach(replaceNode);
     return element;
 }
+
+type HTMLAttributeNameAndType<
+    TTagName extends keyof HTMLElementTagNameMap,
+    TPropertyName extends keyof HTMLElementTagNameMap[TTagName]
+> = TPropertyName extends "classList"
+    ? { name: "class"; type: string }
+    : HTMLElementTagNameMap[TTagName][TPropertyName] extends
+          | string
+          | boolean
+          | number
+    ? {
+          name: TPropertyName;
+          type: HTMLElementTagNameMap[TTagName][TPropertyName];
+      }
+    : { name: never; type: never };
+
+type HTMLElementAttributePartialRecord<
+    TName extends keyof HTMLElementTagNameMap
+> = {
+    [k in keyof HTMLElementTagNameMap[TName] as HTMLAttributeNameAndType<
+        TName,
+        k
+    >["name"]]?: HTMLAttributeNameAndType<TName, k>["type"];
+};
+export function createElement<TName extends keyof HTMLElementTagNameMap>(
+    name: TName,
+    attributes: Readonly<HTMLElementAttributePartialRecord<TName>> | null,
+    ...children: (Node | string)[]
+): HTMLElementTagNameMap[TName] {
+    const element = document.createElement(name);
+    for (const [key, value] of Object.entries(attributes ?? {})) {
+        element.setAttribute(key, String(value));
+    }
+    element.append(...children);
+    return element;
+}
