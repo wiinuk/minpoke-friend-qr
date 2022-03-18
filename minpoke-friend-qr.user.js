@@ -4301,39 +4301,29 @@ function asyncMain() {
                 });
             });
         }
-        function insertLocationUI(commentElement) {
+        function createLocationUI(sourceText) {
             return __awaiter(this, void 0, void 0, function () {
-                var _this = this;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, replaceAllTextToElement(commentElement, locationPattern, function (sourceText) { return __awaiter(_this, void 0, void 0, function () {
-                                var country, _a, searchText, countryCode, countryName, selectIndex, selectLength;
-                                return __generator(this, function (_b) {
-                                    switch (_b.label) {
-                                        case 0: return [4 /*yield*/, searchLocationInfoHeuristic(sourceText)];
-                                        case 1:
-                                            country = _b.sent();
-                                            _a = country !== null && country !== void 0 ? country : {
-                                                searchText: sourceText,
-                                                countryCode: "un",
-                                                countryName: "unknown country",
-                                            }, searchText = _a.searchText, countryCode = _a.countryCode, countryName = _a.countryName;
-                                            selectIndex = sourceText.indexOf(searchText);
-                                            selectLength = searchText.length;
-                                            // 見つからない場合は最初から最後までを選択する
-                                            if (selectIndex < 0) {
-                                                selectIndex = 0;
-                                                selectLength = sourceText.length;
-                                            }
-                                            return [2 /*return*/, (jsxs("span", { children: [sourceText.substring(0, selectIndex), jsxs("span", __assign({ class: qrLocationName }, { children: [sourceText.substring(selectIndex, selectIndex + selectLength), jsx("img", { class: qrLocationFlagName, src: "https://flagcdn.com/".concat(countryCode.toLowerCase(), ".svg"), width: 16, title: sourceText !== searchText
-                                                                        ? "".concat(searchText, " \u21D2 ").concat(countryName)
-                                                                        : countryName, alt: countryName })] })), sourceText.substring(selectIndex + selectLength)] }))];
-                                    }
-                                });
-                            }); })];
+                var country, _a, searchText, countryCode, countryName, selectIndex, selectLength;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: return [4 /*yield*/, searchLocationInfoHeuristic(sourceText)];
                         case 1:
-                            _a.sent();
-                            return [2 /*return*/];
+                            country = _b.sent();
+                            _a = country !== null && country !== void 0 ? country : {
+                                searchText: sourceText,
+                                countryCode: "un",
+                                countryName: "unknown country",
+                            }, searchText = _a.searchText, countryCode = _a.countryCode, countryName = _a.countryName;
+                            selectIndex = sourceText.indexOf(searchText);
+                            selectLength = searchText.length;
+                            // 見つからない場合は最初から最後までを選択する
+                            if (selectIndex < 0) {
+                                selectIndex = 0;
+                                selectLength = sourceText.length;
+                            }
+                            return [2 /*return*/, (jsxs("span", { children: [sourceText.substring(0, selectIndex), jsxs("span", __assign({ class: qrLocationName }, { children: [sourceText.substring(selectIndex, selectIndex + selectLength), jsx("img", { class: qrLocationFlagName, src: "https://flagcdn.com/".concat(countryCode.toLowerCase(), ".svg"), width: 16, title: sourceText !== searchText
+                                                        ? "".concat(searchText, " \u21D2 ").concat(countryName)
+                                                        : countryName, alt: countryName })] })), sourceText.substring(selectIndex + selectLength)] }))];
                     }
                 });
             });
@@ -4359,7 +4349,7 @@ function asyncMain() {
                                             return [4 /*yield*/, appendCodeUI(parentElement, comment, copyButton)];
                                         case 1:
                                             _c.sent();
-                                            return [4 /*yield*/, insertLocationUI(commentElement)];
+                                            return [4 /*yield*/, replaceAllTextToElement(commentElement, locationPattern, createLocationUI)];
                                         case 2:
                                             _c.sent();
                                             return [2 /*return*/];
