@@ -5,7 +5,7 @@
 // @downloadURL  https://github.com/wiinuk/minpoke-friend-qr/raw/master/minpoke-friend-qr.user.js
 // @updateURL    https://github.com/wiinuk/minpoke-friend-qr/raw/master/minpoke-friend-qr.user.js
 // @homepageURL  https://github.com/wiinuk/minpoke-friend-qr
-// @version      0.3.0
+// @version      0.3.1
 // @description  Add QR code to friend list
 // @author       Wiinuk
 // @match        https://9db.jp/pokego/data/432*
@@ -3324,6 +3324,55 @@ function __classPrivateFieldSet(receiver, state, value, kind, f) {
     return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
 }
 
+;// CONCATENATED MODULE: ./source/document-jsx/jsx-runtime.ts
+
+function jsxs(name, properties, 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+_option) {
+    var e_1, _a, e_2, _b;
+    var element = document.createElement(name);
+    try {
+        for (var _c = __values(Object.entries(properties !== null && properties !== void 0 ? properties : {})), _d = _c.next(); !_d.done; _d = _c.next()) {
+            var _e = __read(_d.value, 2), key = _e[0], value = _e[1];
+            if (key === "children")
+                continue;
+            element.setAttribute(key, String(value));
+        }
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+        }
+        finally { if (e_1) throw e_1.error; }
+    }
+    var children = properties === null || properties === void 0 ? void 0 : properties.children;
+    if (children) {
+        if (Array.isArray(children)) {
+            try {
+                for (var _f = __values(children), _g = _f.next(); !_g.done; _g = _f.next()) {
+                    var child = _g.value;
+                    if (!child)
+                        continue;
+                    element.append(child);
+                }
+            }
+            catch (e_2_1) { e_2 = { error: e_2_1 }; }
+            finally {
+                try {
+                    if (_g && !_g.done && (_b = _f.return)) _b.call(_f);
+                }
+                finally { if (e_2) throw e_2.error; }
+            }
+        }
+        else {
+            element.append(children);
+        }
+    }
+    return element;
+}
+var jsx = jsxs;
+
 // EXTERNAL MODULE: ./node_modules/qrcode/lib/browser.js
 var browser = __webpack_require__(592);
 ;// CONCATENATED MODULE: ./source/document-extensions.ts
@@ -3397,29 +3446,6 @@ function replaceAllTextToElement(element, pattern, matchedTextToElement) {
             return [2 /*return*/, element];
         });
     });
-}
-function createElement(name, attributes) {
-    var e_1, _a;
-    var children = [];
-    for (var _i = 2; _i < arguments.length; _i++) {
-        children[_i - 2] = arguments[_i];
-    }
-    var element = document.createElement(name);
-    try {
-        for (var _b = __values(Object.entries(attributes !== null && attributes !== void 0 ? attributes : {})), _c = _b.next(); !_c.done; _c = _b.next()) {
-            var _d = __read(_c.value, 2), key = _d[0], value = _d[1];
-            element.setAttribute(key, String(value));
-        }
-    }
-    catch (e_1_1) { e_1 = { error: e_1_1 }; }
-    finally {
-        try {
-            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-        }
-        finally { if (e_1) throw e_1.error; }
-    }
-    element.append.apply(element, __spreadArray([], __read(children), false));
-    return element;
 }
 
 ;// CONCATENATED MODULE: ./source/json-spec.ts
@@ -3993,9 +4019,10 @@ function createGeonamesClient(userName) {
     return new GeonamesClient(userName);
 }
 
-;// CONCATENATED MODULE: ./source/minpoke-friend-qr.ts
-/* eslint-disable rulesdir/no-unused-await */
+;// CONCATENATED MODULE: ./source/minpoke-friend-qr.tsx
 
+
+/* eslint-disable rulesdir/no-unused-await */
 
 
 
@@ -4168,9 +4195,7 @@ function asyncMain() {
                 return __generator(this, function (_e) {
                     switch (_e.label) {
                         case 0:
-                            item = document.createElement("li");
-                            item.innerText = message;
-                            item.classList.add(toastItemName);
+                            item = jsx("li", __assign({ class: toastItemName }, { children: message }));
                             toastListElement.insertBefore(item, toastListElement.firstElementChild);
                             return [4 /*yield*/, sleep(timeout)];
                         case 1:
@@ -4184,20 +4209,15 @@ function asyncMain() {
         function createQRElement(code) {
             var _a;
             return __awaiter(this, void 0, void 0, function () {
-                var qrContainerElement, checkboxId, qrCodeElement;
+                var qrCodeElement, checkboxId, qrContainerElement;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
-                        case 0:
-                            qrContainerElement = document.createElement("span");
-                            qrContainerElement.classList.add(qrContainerName);
-                            qrContainerElement.title = "QR コードを表示";
-                            checkboxId = "qr-checkbox-".concat(nextCheckboxId++);
-                            qrContainerElement.innerHTML = "\n        <input type=\"checkbox\" class=\"".concat(qrCheckboxName, "\" id=\"").concat(checkboxId, "\" />\n        <label type=\"button\" class=\"").concat(qrLabelName, "\" for=\"").concat(checkboxId, "\">QR \uD83D\uDCF8</label>\n    ");
-                            return [4 /*yield*/, createQRCodeElement(code)];
+                        case 0: return [4 /*yield*/, createQRCodeElement(code)];
                         case 1:
                             qrCodeElement = _b.sent();
                             qrCodeElement.classList.add(qrName);
-                            qrContainerElement.appendChild(qrCodeElement);
+                            checkboxId = "qr-checkbox-".concat(nextCheckboxId++);
+                            qrContainerElement = (jsxs("span", __assign({ class: qrContainerName, title: "QR \u30B3\u30FC\u30C9\u3092\u8868\u793A" }, { children: [jsx("input", { type: "checkbox", class: qrCheckboxName, id: checkboxId }), jsx("label", __assign({ class: qrLabelName, for: checkboxId }, { children: "QR \uD83D\uDCF8" })), qrCodeElement] })));
                             (_a = qrContainerElement
                                 .querySelector("input")) === null || _a === void 0 ? void 0 : _a.addEventListener("click", function () {
                                 var _this = this;
@@ -4217,105 +4237,67 @@ function asyncMain() {
                 });
             });
         }
+        function createCodeCopyButton(code) {
+            var _this = this;
+            var copyButton = (jsx("button", __assign({ type: "button", title: "".concat(code, " \u3092\u30AF\u30EA\u30C3\u30D7\u30DC\u30FC\u30C9\u306B\u30B3\u30D4\u30FC") }, { children: "\uD83D\uDCCB" })));
+            copyButton.addEventListener("click", function () {
+                handleAsyncError((function () { return __awaiter(_this, void 0, void 0, function () {
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0: return [4 /*yield*/, navigator.clipboard.writeText(code)];
+                            case 1:
+                                _a.sent();
+                                return [4 /*yield*/, toast("".concat(code, " \u3092\u30AF\u30EA\u30C3\u30D7\u30DC\u30FC\u30C9\u306B\u30B3\u30D4\u30FC\u3057\u307E\u3057\u305F"))];
+                            case 2:
+                                _a.sent();
+                                return [2 /*return*/];
+                        }
+                    });
+                }); })());
+            });
+            return copyButton;
+        }
         function appendCodeUI(parentElement, comment, copyButton) {
             return __awaiter(this, void 0, void 0, function () {
-                var codes, _loop_1, codes_1, codes_1_1, code, e_4_1;
-                var e_4, _a;
-                var _this = this;
-                return __generator(this, function (_b) {
-                    switch (_b.label) {
+                var codes, codes_1, codes_1_1, code, _a, _b, _c, _d, _e, e_4_1;
+                var e_4, _f, _g;
+                return __generator(this, function (_h) {
+                    switch (_h.label) {
                         case 0:
                             codes = unique(getCodes(comment));
-                            _loop_1 = function (code) {
-                                var idContainerElement, numberElement, copyButton_1, _c, _d;
-                                return __generator(this, function (_e) {
-                                    switch (_e.label) {
-                                        case 0:
-                                            idContainerElement = document.createElement("span");
-                                            idContainerElement.classList.add(idContainerName);
-                                            if (1 < codes.length) {
-                                                numberElement = document.createElement("div");
-                                                numberElement.innerText = code;
-                                                numberElement.classList.add(qrNumberName);
-                                                idContainerElement.appendChild(numberElement);
-                                            }
-                                            if (copyButton) {
-                                                copyButton_1 = document.createElement("button");
-                                                copyButton_1.innerText = "\uD83D\uDCCB";
-                                                copyButton_1.title = "".concat(code, " \u3092\u30AF\u30EA\u30C3\u30D7\u30DC\u30FC\u30C9\u306B\u30B3\u30D4\u30FC");
-                                                copyButton_1.type = "button";
-                                                copyButton_1.addEventListener("click", function () {
-                                                    handleAsyncError((function () { return __awaiter(_this, void 0, void 0, function () {
-                                                        return __generator(this, function (_a) {
-                                                            switch (_a.label) {
-                                                                case 0: return [4 /*yield*/, navigator.clipboard.writeText(code)];
-                                                                case 1:
-                                                                    _a.sent();
-                                                                    return [4 /*yield*/, toast("".concat(code, " \u3092\u30AF\u30EA\u30C3\u30D7\u30DC\u30FC\u30C9\u306B\u30B3\u30D4\u30FC\u3057\u307E\u3057\u305F"))];
-                                                                case 2:
-                                                                    _a.sent();
-                                                                    return [2 /*return*/];
-                                                            }
-                                                        });
-                                                    }); })());
-                                                });
-                                                idContainerElement.appendChild(copyButton_1);
-                                            }
-                                            _d = (_c = idContainerElement).appendChild;
-                                            return [4 /*yield*/, createQRElement(code)];
-                                        case 1:
-                                            _d.apply(_c, [_e.sent()]);
-                                            parentElement.appendChild(idContainerElement);
-                                            return [2 /*return*/];
-                                    }
-                                });
-                            };
-                            _b.label = 1;
+                            _h.label = 1;
                         case 1:
-                            _b.trys.push([1, 6, 7, 8]);
+                            _h.trys.push([1, 6, 7, 8]);
                             codes_1 = __values(codes), codes_1_1 = codes_1.next();
-                            _b.label = 2;
+                            _h.label = 2;
                         case 2:
                             if (!!codes_1_1.done) return [3 /*break*/, 5];
                             code = codes_1_1.value;
-                            return [5 /*yield**/, _loop_1(code)];
+                            _b = (_a = parentElement).appendChild;
+                            _c = ["span"];
+                            _d = [{ class: idContainerName }];
+                            _g = {};
+                            _e = [1 < codes.length && jsx("div", __assign({ class: qrNumberName }, { children: code })), copyButton && createCodeCopyButton(code)];
+                            return [4 /*yield*/, createQRElement(code)];
                         case 3:
-                            _b.sent();
-                            _b.label = 4;
+                            _b.apply(_a, [jsxs.apply(void 0, _c.concat([__assign.apply(void 0, _d.concat([(_g.children = _e.concat([_h.sent()]), _g)]))]))]);
+                            _h.label = 4;
                         case 4:
                             codes_1_1 = codes_1.next();
                             return [3 /*break*/, 2];
                         case 5: return [3 /*break*/, 8];
                         case 6:
-                            e_4_1 = _b.sent();
+                            e_4_1 = _h.sent();
                             e_4 = { error: e_4_1 };
                             return [3 /*break*/, 8];
                         case 7:
                             try {
-                                if (codes_1_1 && !codes_1_1.done && (_a = codes_1.return)) _a.call(codes_1);
+                                if (codes_1_1 && !codes_1_1.done && (_f = codes_1.return)) _f.call(codes_1);
                             }
                             finally { if (e_4) throw e_4.error; }
                             return [7 /*endfinally*/];
                         case 8: return [2 /*return*/];
                     }
-                });
-            });
-        }
-        function createFlagUI(_a) {
-            var sourceText = _a.sourceText, searchText = _a.searchText, countryCode = _a.countryCode, countryName = _a.countryName;
-            return __awaiter(this, void 0, void 0, function () {
-                var image;
-                return __generator(this, function (_b) {
-                    image = document.createElement("img");
-                    image.classList.add(qrLocationFlagName);
-                    image.src = "https://flagcdn.com/".concat(countryCode.toLowerCase(), ".svg");
-                    image.width = 16;
-                    image.title =
-                        sourceText !== searchText
-                            ? "".concat(searchText, " \u21D2 ").concat(countryName)
-                            : countryName;
-                    image.alt = countryName;
-                    return [2 /*return*/, image];
                 });
             });
         }
@@ -4325,36 +4307,27 @@ function asyncMain() {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0: return [4 /*yield*/, replaceAllTextToElement(commentElement, locationPattern, function (sourceText) { return __awaiter(_this, void 0, void 0, function () {
-                                var country, searchText, selectIndex, selectLength, _a, _b, _c, _d;
-                                var _e;
-                                return __generator(this, function (_f) {
-                                    switch (_f.label) {
+                                var country, _a, searchText, countryCode, countryName, selectIndex, selectLength;
+                                return __generator(this, function (_b) {
+                                    switch (_b.label) {
                                         case 0: return [4 /*yield*/, searchLocationInfoHeuristic(sourceText)];
                                         case 1:
-                                            country = (_e = (_f.sent())) !== null && _e !== void 0 ? _e : {
+                                            country = _b.sent();
+                                            _a = country !== null && country !== void 0 ? country : {
                                                 searchText: sourceText,
                                                 countryCode: "un",
                                                 countryName: "unknown country",
-                                            };
-                                            searchText = country.searchText;
-                                            selectIndex = sourceText.indexOf(country.searchText);
+                                            }, searchText = _a.searchText, countryCode = _a.countryCode, countryName = _a.countryName;
+                                            selectIndex = sourceText.indexOf(searchText);
                                             selectLength = searchText.length;
                                             // 見つからない場合は最初から最後までを選択する
                                             if (selectIndex < 0) {
                                                 selectIndex = 0;
                                                 selectLength = sourceText.length;
                                             }
-                                            _a = createElement;
-                                            _b = ["span",
-                                                null,
-                                                sourceText.substring(0, selectIndex)];
-                                            _c = createElement;
-                                            _d = ["span",
-                                                { class: qrLocationName },
-                                                sourceText.substring(selectIndex, selectIndex + selectLength)];
-                                            return [4 /*yield*/, createFlagUI(__assign(__assign({}, country), { sourceText: sourceText }))];
-                                        case 2: return [2 /*return*/, _a.apply(void 0, _b.concat([_c.apply(void 0, _d.concat([_f.sent()])),
-                                                sourceText.substring(selectIndex + selectLength)]))];
+                                            return [2 /*return*/, (jsxs("span", { children: [sourceText.substring(0, selectIndex), jsxs("span", __assign({ class: qrLocationName }, { children: [sourceText.substring(selectIndex, selectIndex + selectLength), jsx("img", { class: qrLocationFlagName, src: "https://flagcdn.com/".concat(countryCode.toLowerCase(), ".svg"), width: 16, title: sourceText !== searchText
+                                                                        ? "".concat(searchText, " \u21D2 ").concat(countryName)
+                                                                        : countryName, alt: countryName })] })), sourceText.substring(selectIndex + selectLength)] }))];
                                     }
                                 });
                             }); })];
@@ -4366,48 +4339,36 @@ function asyncMain() {
             });
         }
         function modifyCommentListUI(_a) {
-            var _b, _c;
-            var _d = _a === void 0 ? {} : _a, _e = _d.copyButton, copyButton = _e === void 0 ? true : _e;
+            var _b = _a === void 0 ? {} : _a, _c = _b.copyButton, copyButton = _c === void 0 ? true : _c;
             return __awaiter(this, void 0, void 0, function () {
-                var _f, _g, commentElement, parentElement, comment, e_5_1;
-                var e_5, _h;
-                return __generator(this, function (_j) {
-                    switch (_j.label) {
-                        case 0:
-                            _j.trys.push([0, 6, 7, 8]);
-                            _f = __values(Array.from(document.querySelectorAll(".comment"))), _g = _f.next();
-                            _j.label = 1;
+                var _this = this;
+                return __generator(this, function (_d) {
+                    switch (_d.label) {
+                        case 0: return [4 /*yield*/, Promise.all(Array.from(document.querySelectorAll(".comment")).map(function (commentElement) { return __awaiter(_this, void 0, void 0, function () {
+                                var parentElement, comment;
+                                var _a, _b;
+                                return __generator(this, function (_c) {
+                                    switch (_c.label) {
+                                        case 0:
+                                            parentElement = (_a = commentElement.parentElement) === null || _a === void 0 ? void 0 : _a.querySelector(".header > .left");
+                                            if (parentElement == null) {
+                                                console.error("親要素が見つかりませんでした。");
+                                                return [2 /*return*/];
+                                            }
+                                            comment = (_b = commentElement.textContent) !== null && _b !== void 0 ? _b : "";
+                                            return [4 /*yield*/, appendCodeUI(parentElement, comment, copyButton)];
+                                        case 1:
+                                            _c.sent();
+                                            return [4 /*yield*/, insertLocationUI(commentElement)];
+                                        case 2:
+                                            _c.sent();
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            }); }))];
                         case 1:
-                            if (!!_g.done) return [3 /*break*/, 5];
-                            commentElement = _g.value;
-                            parentElement = (_b = commentElement.parentElement) === null || _b === void 0 ? void 0 : _b.querySelector(".header > .left");
-                            if (parentElement == null) {
-                                console.error("親要素が見つかりませんでした。");
-                                return [3 /*break*/, 4];
-                            }
-                            comment = (_c = commentElement.textContent) !== null && _c !== void 0 ? _c : "";
-                            return [4 /*yield*/, appendCodeUI(parentElement, comment, copyButton)];
-                        case 2:
-                            _j.sent();
-                            return [4 /*yield*/, insertLocationUI(commentElement)];
-                        case 3:
-                            _j.sent();
-                            _j.label = 4;
-                        case 4:
-                            _g = _f.next();
-                            return [3 /*break*/, 1];
-                        case 5: return [3 /*break*/, 8];
-                        case 6:
-                            e_5_1 = _j.sent();
-                            e_5 = { error: e_5_1 };
-                            return [3 /*break*/, 8];
-                        case 7:
-                            try {
-                                if (_g && !_g.done && (_h = _f.return)) _h.call(_f);
-                            }
-                            finally { if (e_5) throw e_5.error; }
-                            return [7 /*endfinally*/];
-                        case 8: return [2 /*return*/];
+                            _d.sent();
+                            return [2 /*return*/];
                     }
                 });
             });
@@ -4430,8 +4391,7 @@ function asyncMain() {
                     toastListName = "qr-toast-list";
                     toastItemName = "qr-toast-item";
                     addStyle(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n        .", " {\n            position: fixed;\n            right: 0;\n            bottom: 0;\n            z-index: 9999;\n            list-style: none;\n            padding: 0;\n            margin: 0;\n        }\n        .", ":first-of-type {\n            border-top: 1px solid #ddd;\n        }\n        .", " {\n            background-color: white;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            border-top: 1px dashed #ccc;\n            margin: 0 0.5em;\n            padding: 1em;\n            box-shadow: 0 2px 2px rgb(0 0 0 / 50%);\n        }\n    "], ["\n        .", " {\n            position: fixed;\n            right: 0;\n            bottom: 0;\n            z-index: 9999;\n            list-style: none;\n            padding: 0;\n            margin: 0;\n        }\n        .", ":first-of-type {\n            border-top: 1px solid #ddd;\n        }\n        .", " {\n            background-color: white;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            border-top: 1px dashed #ccc;\n            margin: 0 0.5em;\n            padding: 1em;\n            box-shadow: 0 2px 2px rgb(0 0 0 / 50%);\n        }\n    "])), toastListName, toastItemName, toastItemName);
-                    toastListElement = document.createElement("ul");
-                    toastListElement.classList.add(toastListName);
+                    toastListElement = jsx("ul", { class: toastListName });
                     document.body.appendChild(toastListElement);
                     nextCheckboxId = 0;
                     locationPattern = /(?<=Location\s*[：:]\s*)(.+)(?=\s*)/i;
