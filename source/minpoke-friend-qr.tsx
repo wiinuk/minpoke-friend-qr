@@ -45,11 +45,11 @@ function unique<T>(
         setCache.push(set);
     }
 }
-function getCodes(contents: string) {
-    return [...contents.matchAll(/(\d\s*){12}/g)].map((match) =>
+function* getCodes(contents: string) {
+    for (const match of contents.matchAll(/(\d[^\d\w]*){12}/g)) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        match[0]!.replace(/\s/g, "")
-    );
+        yield match[0]!.replace(/\D/g, "");
+    }
 }
 let domParser: DOMParser | null = null;
 async function createQRCodeElement(code: string) {
