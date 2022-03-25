@@ -45,7 +45,7 @@ function unique<T>(
         setCache.push(set);
     }
 }
-function* getCodes(contents: string) {
+export function* getCodes(contents: string) {
     for (const match of contents.matchAll(/(\d[^\d\w]*){12}/g)) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         yield match[0]!.replace(/\D/g, "");

@@ -1,4 +1,4 @@
-import { getHeuristicLocationTexts, main } from "./minpoke-friend-qr";
+import { getCodes, getHeuristicLocationTexts, main } from "./minpoke-friend-qr";
 
 describe("main", () => {
     it("main が定義されている", () => {
@@ -16,5 +16,10 @@ describe("getHeuristicLocationTexts", () => {
         expect(getTexts("Santiago | Chile")).toContain("Santiago Chile");
         // "\u0301": COMBINING ACUTE ACCENT
         expect(getTexts("a\u0301b c")).toContain("a\u0301b");
+    });
+});
+describe("getCodes", () => {
+    it("1234-1234-1234", () => {
+        expect([...getCodes("1234-1234-1234")]).toEqual(["123412341234"]);
     });
 });

@@ -5,7 +5,7 @@
 // @downloadURL  https://github.com/wiinuk/minpoke-friend-qr/raw/master/minpoke-friend-qr.user.js
 // @updateURL    https://github.com/wiinuk/minpoke-friend-qr/raw/master/minpoke-friend-qr.user.js
 // @homepageURL  https://github.com/wiinuk/minpoke-friend-qr
-// @version      0.3.1
+// @version      0.3.2
 // @description  Add QR code to friend list
 // @author       Wiinuk
 // @match        https://9db.jp/pokego/data/432*
@@ -4068,9 +4068,39 @@ function unique(array, getKey) {
     }
 }
 function getCodes(contents) {
-    return __spreadArray([], __read(contents.matchAll(/(\d\s*){12}/g)), false).map(function (match) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return match[0].replace(/\s/g, "");
+    var _a, _b, match, e_2_1;
+    var e_2, _c;
+    return __generator(this, function (_d) {
+        switch (_d.label) {
+            case 0:
+                _d.trys.push([0, 5, 6, 7]);
+                _a = __values(contents.matchAll(/(\d[^\d\w]*){12}/g)), _b = _a.next();
+                _d.label = 1;
+            case 1:
+                if (!!_b.done) return [3 /*break*/, 4];
+                match = _b.value;
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                return [4 /*yield*/, match[0].replace(/\D/g, "")];
+            case 2:
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                _d.sent();
+                _d.label = 3;
+            case 3:
+                _b = _a.next();
+                return [3 /*break*/, 1];
+            case 4: return [3 /*break*/, 7];
+            case 5:
+                e_2_1 = _d.sent();
+                e_2 = { error: e_2_1 };
+                return [3 /*break*/, 7];
+            case 6:
+                try {
+                    if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
+                }
+                finally { if (e_2) throw e_2.error; }
+                return [7 /*endfinally*/];
+            case 7: return [2 /*return*/];
+        }
     });
 }
 var domParser = null;
@@ -4092,7 +4122,7 @@ var geonames = createGeonamesClient("tkxtk");
 function searchLocationInfo(query) {
     return __awaiter(this, void 0, void 0, function () {
         var result, _a, _b, geoname, countryCode, countryName;
-        var e_2, _c;
+        var e_3, _c;
         return __generator(this, function (_d) {
             switch (_d.label) {
                 case 0: return [4 /*yield*/, geonames.search({
@@ -4111,12 +4141,12 @@ function searchLocationInfo(query) {
                             return [2 /*return*/, { countryCode: countryCode, countryName: countryName }];
                         }
                     }
-                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                    catch (e_3_1) { e_3 = { error: e_3_1 }; }
                     finally {
                         try {
                             if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
                         }
-                        finally { if (e_2) throw e_2.error; }
+                        finally { if (e_3) throw e_3.error; }
                     }
                     return [2 /*return*/];
             }
@@ -4149,8 +4179,8 @@ function getHeuristicLocationTexts(originalText) {
 }
 function searchLocationInfoHeuristic(locationText) {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, _b, searchText, info, e_3_1;
-        var e_3, _c;
+        var _a, _b, searchText, info, e_4_1;
+        var e_4, _c;
         return __generator(this, function (_d) {
             switch (_d.label) {
                 case 0:
@@ -4171,14 +4201,14 @@ function searchLocationInfoHeuristic(locationText) {
                     return [3 /*break*/, 1];
                 case 4: return [3 /*break*/, 7];
                 case 5:
-                    e_3_1 = _d.sent();
-                    e_3 = { error: e_3_1 };
+                    e_4_1 = _d.sent();
+                    e_4 = { error: e_4_1 };
                     return [3 /*break*/, 7];
                 case 6:
                     try {
                         if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
                     }
-                    finally { if (e_3) throw e_3.error; }
+                    finally { if (e_4) throw e_4.error; }
                     return [7 /*endfinally*/];
                 case 7: return [2 /*return*/];
             }
@@ -4259,8 +4289,8 @@ function asyncMain() {
         }
         function appendCodeUI(parentElement, comment, copyButton) {
             return __awaiter(this, void 0, void 0, function () {
-                var codes, codes_1, codes_1_1, code, _a, _b, _c, _d, _e, e_4_1;
-                var e_4, _f, _g;
+                var codes, codes_1, codes_1_1, code, _a, _b, _c, _d, _e, e_5_1;
+                var e_5, _f, _g;
                 return __generator(this, function (_h) {
                     switch (_h.label) {
                         case 0:
@@ -4287,14 +4317,14 @@ function asyncMain() {
                             return [3 /*break*/, 2];
                         case 5: return [3 /*break*/, 8];
                         case 6:
-                            e_4_1 = _h.sent();
-                            e_4 = { error: e_4_1 };
+                            e_5_1 = _h.sent();
+                            e_5 = { error: e_5_1 };
                             return [3 /*break*/, 8];
                         case 7:
                             try {
                                 if (codes_1_1 && !codes_1_1.done && (_f = codes_1.return)) _f.call(codes_1);
                             }
-                            finally { if (e_4) throw e_4.error; }
+                            finally { if (e_5) throw e_5.error; }
                             return [7 /*endfinally*/];
                         case 8: return [2 /*return*/];
                     }
