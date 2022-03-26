@@ -76,7 +76,7 @@ async function searchLocationInfo(query: string) {
     }
     return;
 }
-export function* getHeuristicLocationTexts(originalText: string) {
+export function* getPartialLocationTexts(originalText: string) {
     yield originalText;
     /**
      * L: letter
@@ -93,12 +93,17 @@ export function* getHeuristicLocationTexts(originalText: string) {
     }
 }
 async function searchLocationInfoHeuristic(locationText: string) {
-    for (const searchText of getHeuristicLocationTexts(locationText)) {
+    for (const searchText of getPartialLocationTexts(locationText)) {
         const info = await searchLocationInfo(searchText);
         if (info) return { ...info, searchText };
     }
 }
 
+const locationPattern =
+    /(?<=Location\s*[：:]\s*|\b(live\s+in|from)\s+)(\w.*)(?=\s*)/i;
+export function getLocationPattern() {
+    return new RegExp(locationPattern, locationPattern.flags + "g");
+}
 async function asyncMain() {
     await waitElementLoaded();
 
@@ -247,10 +252,10 @@ async function asyncMain() {
             countryName: "unknown country",
         };
 
-        // 元の文字列の中の `searchText` を選択する
+        // `sourceText` の中の `searchText` を選択する
         let selectIndex = sourceText.indexOf(searchText);
         let selectLength = searchText.length;
-        // 見つからない場合は最初から最後までを選択する
+        // 見つからない場合は `sourceText` 全体を選択する
         if (selectIndex < 0) {
             selectIndex = 0;
             selectLength = sourceText.length;
@@ -279,7 +284,6 @@ async function asyncMain() {
             </span>
         );
     }
-    const locationPattern = /(?<=Location\s*[：:]\s*)(.+)(?=\s*)/i;
     async function modifyCommentListUI({ copyButton = true } = {}) {
         await Promise.all(
             Array.from(document.querySelectorAll(".comment")).map(
