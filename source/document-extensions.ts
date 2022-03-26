@@ -7,15 +7,16 @@ export function waitElementLoaded() {
     );
 }
 
+type CssSourceParts = string | number;
 let styleElement: HTMLStyleElement | null = null;
 export function addStyle(css: string): void;
 export function addStyle(
     template: TemplateStringsArray,
-    ...substitutions: unknown[]
+    ...substitutions: CssSourceParts[]
 ): void;
 export function addStyle(
     cssOrTemplate: TemplateStringsArray | string,
-    ...substitutions: unknown[]
+    ...substitutions: CssSourceParts[]
 ) {
     const css =
         typeof cssOrTemplate === "string"
