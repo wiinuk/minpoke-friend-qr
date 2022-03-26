@@ -5,7 +5,7 @@
 // @downloadURL  https://github.com/wiinuk/minpoke-friend-qr/raw/master/minpoke-friend-qr.user.js
 // @updateURL    https://github.com/wiinuk/minpoke-friend-qr/raw/master/minpoke-friend-qr.user.js
 // @homepageURL  https://github.com/wiinuk/minpoke-friend-qr
-// @version      0.3.2
+// @version      0.3.3
 // @description  Add QR code to friend list
 // @author       Wiinuk
 // @match        https://9db.jp/pokego/data/432*
@@ -4153,7 +4153,7 @@ function searchLocationInfo(query) {
         });
     });
 }
-function getHeuristicLocationTexts(originalText) {
+function getPartialLocationTexts(originalText) {
     var tokenPattern, tokens, i;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -4185,7 +4185,7 @@ function searchLocationInfoHeuristic(locationText) {
             switch (_d.label) {
                 case 0:
                     _d.trys.push([0, 5, 6, 7]);
-                    _a = __values(getHeuristicLocationTexts(locationText)), _b = _a.next();
+                    _a = __values(getPartialLocationTexts(locationText)), _b = _a.next();
                     _d.label = 1;
                 case 1:
                     if (!!_b.done) return [3 /*break*/, 4];
@@ -4214,6 +4214,10 @@ function searchLocationInfoHeuristic(locationText) {
             }
         });
     });
+}
+var locationPattern = /(?<=Location\s*[：:]\s*|\b(live\s+in|from)\s+)(\w.*)(?=\s*)/i;
+function getLocationPattern() {
+    return new RegExp(locationPattern, locationPattern.flags + "g");
 }
 function asyncMain() {
     return __awaiter(this, void 0, void 0, function () {
@@ -4346,7 +4350,7 @@ function asyncMain() {
                             }, searchText = _a.searchText, countryCode = _a.countryCode, countryName = _a.countryName;
                             selectIndex = sourceText.indexOf(searchText);
                             selectLength = searchText.length;
-                            // 見つからない場合は最初から最後までを選択する
+                            // 見つからない場合は `sourceText` 全体を選択する
                             if (selectIndex < 0) {
                                 selectIndex = 0;
                                 selectLength = sourceText.length;
@@ -4393,7 +4397,7 @@ function asyncMain() {
                 });
             });
         }
-        var idContainerName, qrNumberName, qrContainerName, qrCheckboxName, qrLabelName, qrName, qrLocationFlagName, qrLocationName, toastListName, toastItemName, toastListElement, nextCheckboxId, locationPattern;
+        var idContainerName, qrNumberName, qrContainerName, qrCheckboxName, qrLabelName, qrName, qrLocationFlagName, qrLocationName, toastListName, toastItemName, toastListElement, nextCheckboxId;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, waitElementLoaded()];
@@ -4414,7 +4418,6 @@ function asyncMain() {
                     toastListElement = jsx("ul", { class: toastListName });
                     document.body.appendChild(toastListElement);
                     nextCheckboxId = 0;
-                    locationPattern = /(?<=Location\s*[：:]\s*)(.+)(?=\s*)/i;
                     if (!document.URL.match(/https?:\/\/9db.jp\/pokemongo\/data\/4264/)) return [3 /*break*/, 3];
                     return [4 /*yield*/, modifyCommentListUI({ copyButton: false })];
                 case 2:
