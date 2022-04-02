@@ -6,7 +6,7 @@ import type {
 } from "./type-level-regexp-parser";
 import { assert, eq, kind } from "./type-utils";
 
-{
+describe("ParseRegExp", () => {
     type parse<pattern extends string> = ParseRegExp<pattern> extends kind<
         [true, ExpressionSummaryKind] | [false, DiagnosticKind[]],
         infer result
@@ -22,14 +22,14 @@ import { assert, eq, kind } from "./type-utils";
         }
     >;
 
-    {
+    it("a", () => {
         assert<eq<parse<"a">, summary>>();
-    }
-    {
+    });
+    it("(a)", () => {
         type r = parse<"(a)">;
         assert<eq<r, summary>>();
-    }
-    {
+    });
+    it("(?<a>(?<a1>)(?<a2>))(?<b>(?<b1>)(?<b2>))", () => {
         type r = parse<"(?<a>(?<a1>)(?<a2>))(?<b>(?<b1>)(?<b2>))">;
         assert<
             eq<
@@ -44,5 +44,18 @@ import { assert, eq, kind } from "./type-utils";
                 }>
             >
         >();
-    }
-}
+    });
+    it("(", () => {
+        type r = parse<"(">;
+        assert<
+            eq<
+                r,
+                [
+                    {
+                        message: "グループの終わりには ')' が必要です";
+                    }
+                ]
+            >
+        >();
+    });
+});

@@ -24,6 +24,10 @@ describe("TypedRegExp", () => {
         //@ts-expect-error 実行時は SyntaxError が発生する
         expect(() => TypedRegExp("a", "uiu")).toThrowError(SyntaxError);
     });
+    it("エラーメッセージ", () => {
+        //@ts-expect-error 実行時は SyntaxError が発生する
+        expect(() => TypedRegExp("(", "u")).toThrowError(SyntaxError);
+    });
 });
 describe(matchAll.name, () => {
     it("引数の RegExp に g フラグが必要", () => {

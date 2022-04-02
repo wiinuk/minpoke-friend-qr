@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import type {
+    DiagnosticKind,
     ExpressionSummaryKind,
     ParseRegExp,
     ParseRegExpResultKind,
@@ -17,7 +18,6 @@ export interface RegExpSpec {
 export interface RegExpSpecWith<TFlag extends FlagKind> extends RegExpSpec {
     flags: Update<RegExpSpec["flags"], TFlag, true>;
 }
-export type GlobalRegExpSpec = RegExpSpecWith<"g">;
 
 type FlagKind =
     // hasIndices
@@ -155,12 +155,20 @@ type ParseSpec<
       >
     : never;
 
+type buildErrorMessage<TDiagnostics extends DiagnosticKind[]> =
+    TDiagnostics extends [
+        kind<DiagnosticKind, infer head>,
+        ...kind<DiagnosticKind[], infer tail>
+    ]
+        ? `ℹ️ ${head["message"]}\n${buildErrorMessage<tail>}`
+        : "";
+
 type unreachable = never;
 type ValidatePattern<TPattern extends PatternKind> =
     ParseRegExp<TPattern> extends kind<ParseRegExpResultKind, infer result>
         ? result[0] extends true
             ? TPattern
-            : never
+            : buildErrorMessage<cast<DiagnosticKind[], result[1]>>
         : unreachable;
 
 interface TypedRegExpConstructor {
@@ -175,7 +183,7 @@ interface TypedRegExpConstructor {
 }
 export const TypedRegExp = RegExp as unknown as TypedRegExpConstructor;
 
-export function matchAll<TSpec extends GlobalRegExpSpec>(
+export function matchAll<TSpec extends RegExpSpecWith<"g">>(
     source: string,
     regexp: TypedRegExp<TSpec>
 ) {
