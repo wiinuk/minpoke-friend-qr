@@ -5,7 +5,7 @@
 // @downloadURL  https://github.com/wiinuk/minpoke-friend-qr/raw/master/minpoke-friend-qr.user.js
 // @updateURL    https://github.com/wiinuk/minpoke-friend-qr/raw/master/minpoke-friend-qr.user.js
 // @homepageURL  https://github.com/wiinuk/minpoke-friend-qr
-// @version      0.3.3
+// @version      0.3.4
 // @description  Add QR code to friend list
 // @author       Wiinuk
 // @match        https://9db.jp/pokego/data/432*
@@ -4215,7 +4215,7 @@ function searchLocationInfoHeuristic(locationText) {
         });
     });
 }
-var locationPattern = /(?<=Location\s*[：:]\s*|\b(live\s+in|from)\s+)(\w.*)(?=\s*)/i;
+var locationPattern = /(?<=Location\s*[：:]\s*|\b(live\s+in|from)\b.+?)([\p{L}\p{Nd}\p{Mn}\p{Pc}].*)(?=\s*)/iu;
 function getLocationPattern() {
     return new RegExp(locationPattern, locationPattern.flags + "g");
 }
@@ -4337,7 +4337,7 @@ function asyncMain() {
         }
         function createLocationUI(sourceText) {
             return __awaiter(this, void 0, void 0, function () {
-                var country, _a, searchText, countryCode, countryName, selectIndex, selectLength;
+                var country, _a, searchText, countryCode, countryName, regionDisplayName, selectIndex, selectLength, selectedText, linkURL;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0: return [4 /*yield*/, searchLocationInfoHeuristic(sourceText)];
@@ -4348,6 +4348,7 @@ function asyncMain() {
                                 countryCode: "un",
                                 countryName: "unknown country",
                             }, searchText = _a.searchText, countryCode = _a.countryCode, countryName = _a.countryName;
+                            regionDisplayName = regionDisplayNames.of(countryCode) || countryName;
                             selectIndex = sourceText.indexOf(searchText);
                             selectLength = searchText.length;
                             // 見つからない場合は `sourceText` 全体を選択する
@@ -4355,9 +4356,11 @@ function asyncMain() {
                                 selectIndex = 0;
                                 selectLength = sourceText.length;
                             }
-                            return [2 /*return*/, (jsxs("span", { children: [sourceText.substring(0, selectIndex), jsxs("span", __assign({ class: qrLocationName }, { children: [sourceText.substring(selectIndex, selectIndex + selectLength), jsx("img", { class: qrLocationFlagName, src: "https://flagcdn.com/".concat(countryCode.toLowerCase(), ".svg"), width: 16, title: sourceText !== searchText
-                                                        ? "".concat(searchText, " \u21D2 ").concat(countryName)
-                                                        : countryName, alt: countryName })] })), sourceText.substring(selectIndex + selectLength)] }))];
+                            selectedText = sourceText.substring(selectIndex, selectIndex + selectLength);
+                            linkURL = "https://www.geonames.org/search.html?q=".concat(encodeURIComponent(selectedText));
+                            return [2 /*return*/, (jsxs("span", { children: [sourceText.substring(0, selectIndex), jsxs("a", __assign({ class: qrLocationName, href: linkURL, target: "_blank", rel: "noopener noreferrer" }, { children: [selectedText, jsx("img", { class: qrLocationFlagName, src: "https://flagcdn.com/".concat(countryCode.toLowerCase(), ".svg"), width: 16, title: selectedText !== searchText
+                                                        ? "".concat(selectedText, " \u21D2 ").concat(regionDisplayName)
+                                                        : regionDisplayName, alt: regionDisplayName })] })), sourceText.substring(selectIndex + selectLength)] }))];
                     }
                 });
             });
@@ -4397,7 +4400,7 @@ function asyncMain() {
                 });
             });
         }
-        var idContainerName, qrNumberName, qrContainerName, qrCheckboxName, qrLabelName, qrName, qrLocationFlagName, qrLocationName, toastListName, toastItemName, toastListElement, nextCheckboxId;
+        var idContainerName, qrNumberName, qrContainerName, qrCheckboxName, qrLabelName, qrName, qrLocationFlagName, qrLocationName, toastListName, toastItemName, toastListElement, nextCheckboxId, regionDisplayNames;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, waitElementLoaded()];
@@ -4418,6 +4421,7 @@ function asyncMain() {
                     toastListElement = jsx("ul", { class: toastListName });
                     document.body.appendChild(toastListElement);
                     nextCheckboxId = 0;
+                    regionDisplayNames = new Intl.DisplayNames([], { type: "region" });
                     if (!document.URL.match(/https?:\/\/9db.jp\/pokemongo\/data\/4264/)) return [3 /*break*/, 3];
                     return [4 /*yield*/, modifyCommentListUI({ copyButton: false })];
                 case 2:
