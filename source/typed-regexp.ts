@@ -4,14 +4,14 @@ import type {
     ParseRegExp,
     ParseRegExpResultKind,
 } from "./type-level-regexp-parser";
-import type { cast, kind, UndefinedToOptional, Update } from "./type-utils";
+import type { cast, kind, Update } from "./type-utils";
 
 type PatternKind = string;
 type FlagsSpecKind = Partial<Record<FlagKind, true>>;
 export interface RegExpSpec {
     pattern: PatternKind;
     flags: FlagsSpecKind;
-    groups: Record<string, string>;
+    groups: Record<string, string | undefined>;
     groupNumberSet: number;
 }
 export interface RegExpSpecWith<TFlag extends FlagKind> extends RegExpSpec {
@@ -35,9 +35,31 @@ type FlagKind =
     // sticky
     | "y";
 
+type flatten<T> = {
+    [k in keyof T]: T[k];
+};
+
+type intersection<a, b> = {} extends a ? b : {} extends b ? a : flatten<a & b>;
+
+export type UndefinedToOptional<T> = intersection<
+    {
+        [k in keyof T as undefined extends T[k] ? never : k]: T[k];
+    },
+    {
+        [k in keyof T as undefined extends T[k]
+            ? T[k] extends undefined
+                ? never
+                : k
+            : never]?: Exclude<T[k], undefined>;
+    }
+>;
+
 type FlagsKind = string;
 type SpecToGroups<TSpec extends RegExpSpec> =
-    keyof TSpec["groups"] extends never ? undefined : TSpec["groups"];
+    keyof TSpec["groups"] extends never
+        ? undefined
+        : cast<Record<string, string>, UndefinedToOptional<TSpec["groups"]>>;
+
 interface TypedRegExpMatchArray<
     TGroups extends Record<string, string> | undefined
 > extends RegExpMatchArray {
@@ -114,24 +136,24 @@ type ValidateFlags<TFlags extends FlagsKind> = ParseFlags<TFlags> extends never
     ? never
     : TFlags;
 
-type ParseSpec<TPattern extends PatternKind, TFlags extends FlagsKind> = kind<
-    RegExpSpec,
-    ParseRegExp<TPattern> extends kind<
-        [true, ExpressionSummaryKind],
-        infer result
-    >
-        ? {
+type ParseSpec<
+    TPattern extends PatternKind,
+    TFlags extends FlagsKind
+> = ParseRegExp<TPattern> extends kind<
+    [true, ExpressionSummaryKind],
+    infer result
+>
+    ? kind<
+          RegExpSpec,
+          {
               pattern: TPattern;
               flags: ParseFlags<TFlags>;
-              groups: cast<
-                  Record<string, string>,
-                  UndefinedToOptional<result[1]["groups"]>
-              >;
+              groups: result[1]["groups"];
               // TODO:
               groupNumberSet: never;
           }
-        : never
->;
+      >
+    : never;
 
 type unreachable = never;
 type ValidatePattern<TPattern extends PatternKind> =

@@ -248,6 +248,7 @@ type startsWith<
     target extends string,
     stream extends StreamKind
 > = stream["remaining"] extends `${target}${string}` ? true : false;
+
 type skipStringUnchecked<
     target extends string,
     stream extends StreamKind
@@ -262,6 +263,15 @@ type skipStringUnchecked<
           }
       >
     : unreachable;
+
+type peekStringOrUndefined<
+    target extends string,
+    stream extends StreamKind
+> = stream["remaining"] extends `${target}${infer remaining}`
+    ? stream["remaining"] extends `${infer prefix}${remaining}`
+        ? prefix
+        : unreachable
+    : undefined;
 
 type skipManyChars0Core<
     charSet extends string,
@@ -831,11 +841,13 @@ type parseAtom<stream extends StreamKind> =
         : parseGroup<stream>;
 
 type assertionSymbols = "^" | "$" | "\\b" | "\\B";
-type assertionGroupStarts = `(?=` | `(?!` | `(?<=` | `(?<!`;
+type negativeAssertionGroupStarts = `(?!` | `(?<!`;
+type assertionGroupStarts = `(?=` | `(?<=` | negativeAssertionGroupStarts;
 type isAssertionStart<stream extends StreamKind> = startsWith<
     assertionSymbols | assertionGroupStarts,
     stream
 >;
+
 /**
  * Assertion[U, N] ::
  * | `^` | `$` | `\\b` | `\\B`
@@ -849,14 +861,19 @@ type parseAssertion<stream extends StreamKind> = startsWith<
     stream
 > extends true
     ? skipStringUnchecked<assertionSymbols, stream>
-    : startsWith<assertionGroupStarts, stream> extends true
+    : peekStringOrUndefined<assertionGroupStarts, stream> extends kind<
+          string,
+          infer assertionGroupStart
+      >
     ? parseDisjunction<
           skipStringUnchecked<assertionGroupStarts, stream>
       > extends kind<StreamKind, infer stream>
         ? parseString<
               ")",
               "groups_must_end_with_')'",
-              setAllGroupType<undefined, stream>
+              assertionGroupStart extends negativeAssertionGroupStarts
+                  ? setAllGroupType<undefined, stream>
+                  : stream
           >
         : unreachable
     : unreachable;
