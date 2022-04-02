@@ -1,47 +1,57 @@
 /* eslint "@typescript-eslint/no-unused-vars": ["warn", { "varsIgnorePattern": "stream|remaining|^_" }] */
 /* eslint-disable @typescript-eslint/ban-types */
 // spell-checker: ignore ZWNJ
-import { assert, eq, kind, not } from "./type-utils";
+import type { kind, not } from "./type-utils";
 
 type stringHeadOrEmpty<s extends string> = s extends `${infer head}${string}`
     ? head
     : "";
 
 type unreachable = never;
-interface DiagnosticKind {
+/** @internal */
+export interface DiagnosticKind {
     message: string;
 }
 type GroupTypeKind = string | undefined;
-type GroupsKind = Record<string, GroupTypeKind>;
-export interface ExpressionSummaryKind {
-    groups: GroupsKind;
-}
+/** @internal */
+export type GroupsKind = Record<string, GroupTypeKind>;
 interface StreamKind {
     remaining: string;
-    result: ExpressionSummaryKind;
     diagnostics: DiagnosticKind[];
     options: ParseOptionsKind;
 
     locals: StreamLocalKind;
 }
-interface StreamLocalKind {
+/** グループスコープ固有の状態 */
+interface ScopeKind {
+    /** 現在の位置から見えるグループの名前と型 */
+    groups: GroupsKind;
+    /** 現在のグループの直下に `|` が含まれているか */
+    hasAlternative: boolean;
+}
+/** 更新頻度の低い状態 */
+interface StreamLocalKind extends ScopeKind {
     /** パース中のグループ名 */
     parsingGroupName: string;
 
-    /** `…(` でグループに入るときに親 result を待避（最後に追加）し、グループから出るとき result を復帰する */
-    ancestorResults: ExpressionSummaryKind[];
+    /** `…(` で子グループに入るときに親スコープを待避（最後に追加）し、子グループから出るとき親スコープを復帰する */
+    ancestorScopes: ScopeKind[];
+
     /** `…(…)` の後 `true` になり、量指定子またはグループの終わりで `false` に戻す */
     isGroupQualifierExpected: boolean;
 }
+type initialGroups = {};
 type initialLocals = kind<
     StreamLocalKind,
     {
+        groups: initialGroups;
+        hasAlternative: false;
+
         parsingGroupName: "";
-        ancestorResults: [];
+        ancestorScopes: [];
         isGroupQualifierExpected: false;
     }
 >;
-type initialResult = kind<ExpressionSummaryKind, { groups: {} }>;
 type createStream<
     source extends string,
     options extends ParseOptionsKind = DefaultParseOptions
@@ -51,7 +61,6 @@ type createStream<
         diagnostics: [];
         options: options;
         remaining: source;
-        result: initialResult;
         locals: initialLocals;
     }
 >;
@@ -60,13 +69,15 @@ type appendGroupName<value extends string, stream extends StreamKind> = kind<
     {
         locals: {
             parsingGroupName: `${stream["locals"]["parsingGroupName"]}${value}`;
-            ancestorResults: stream["locals"]["ancestorResults"];
+
+            ancestorScopes: stream["locals"]["ancestorScopes"];
             isGroupQualifierExpected: stream["locals"]["isGroupQualifierExpected"];
+            groups: stream["locals"]["groups"];
+            hasAlternative: stream["locals"]["hasAlternative"];
         };
         diagnostics: stream["diagnostics"];
         options: stream["options"];
         remaining: stream["remaining"];
-        result: stream["result"];
     }
 >;
 type appendGroupNameFromHead<stream extends StreamKind> = appendGroupName<
@@ -88,29 +99,34 @@ type clearParsingGroupName<stream extends StreamKind> = kind<
     {
         locals: {
             parsingGroupName: "";
-            ancestorResults: stream["locals"]["ancestorResults"];
+            ancestorScopes: stream["locals"]["ancestorScopes"];
             isGroupQualifierExpected: stream["locals"]["isGroupQualifierExpected"];
+            groups: stream["locals"]["groups"];
+            hasAlternative: stream["locals"]["hasAlternative"];
         };
         diagnostics: stream["diagnostics"];
         options: stream["options"];
         remaining: stream["remaining"];
-        result: stream["result"];
     }
 >;
 type setParsingGroupNameToGroups<stream extends StreamKind> = kind<
     StreamKind,
     {
-        locals: stream["locals"];
-        diagnostics: stream["diagnostics"];
-        options: stream["options"];
-        remaining: stream["remaining"];
-        result: {
+        locals: {
             groups: addGroup<
-                stream["result"]["groups"],
+                stream["locals"]["groups"],
                 stream["locals"]["parsingGroupName"],
                 string
             >;
+
+            ancestorScopes: stream["locals"]["ancestorScopes"];
+            isGroupQualifierExpected: stream["locals"]["isGroupQualifierExpected"];
+            parsingGroupName: stream["locals"]["parsingGroupName"];
+            hasAlternative: stream["locals"]["hasAlternative"];
         };
+        diagnostics: stream["diagnostics"];
+        options: stream["options"];
+        remaining: stream["remaining"];
     }
 >;
 type markGroupQuantifierExpected<stream extends StreamKind> = kind<
@@ -119,12 +135,13 @@ type markGroupQuantifierExpected<stream extends StreamKind> = kind<
         locals: {
             isGroupQualifierExpected: true;
             parsingGroupName: stream["locals"]["parsingGroupName"];
-            ancestorResults: stream["locals"]["ancestorResults"];
+            ancestorScopes: stream["locals"]["ancestorScopes"];
+            groups: stream["locals"]["groups"];
+            hasAlternative: stream["locals"]["hasAlternative"];
         };
         diagnostics: stream["diagnostics"];
         options: stream["options"];
         remaining: stream["remaining"];
-        result: stream["result"];
     }
 >;
 type overwriteGroups<
@@ -142,17 +159,27 @@ type overwriteGroups<
             : unreachable;
     }
 >;
+type setGroupType<
+    groupType extends GroupTypeKind,
+    groups extends GroupsKind
+> = kind<GroupsKind, { [key in keyof groups]: groupType }>;
 
 type beginGroup<stream extends StreamKind> = kind<
     StreamKind,
     {
-        // 子グループのための result を作成
-        result: initialResult;
         locals: {
-            // 親グループの result を待避
-            ancestorResults: [
-                ...stream["locals"]["ancestorResults"],
-                stream["result"]
+            // 子グループを作成
+            groups: initialGroups;
+            // 子グループの最初なので直下に `|` は含まれていない
+            hasAlternative: false;
+
+            // 親グループを待避
+            ancestorScopes: [
+                ...stream["locals"]["ancestorScopes"],
+                {
+                    groups: stream["locals"]["groups"];
+                    hasAlternative: stream["locals"]["hasAlternative"];
+                }
             ];
 
             parsingGroupName: stream["locals"]["parsingGroupName"];
@@ -163,38 +190,59 @@ type beginGroup<stream extends StreamKind> = kind<
         remaining: stream["remaining"];
     }
 >;
+type endGroup<stream extends StreamKind> =
+    // 親グループを取得
+    stream["locals"]["ancestorScopes"] extends [
+        ...kind<ScopeKind[], infer ancestorScopes>,
+        kind<ScopeKind, infer parentScope>
+    ]
+        ? kind<
+              StreamKind,
+              {
+                  locals: {
+                      // 親グループの groups と子グループの groups を結合
+                      groups: overwriteGroups<
+                          parentScope["groups"],
+                          stream["locals"]["groups"]
+                      >;
+                      // スコープ固有の値を復帰
+                      hasAlternative: stream["locals"]["hasAlternative"];
+
+                      // 残りの先祖
+                      ancestorScopes: ancestorScopes;
+                      // グループ量指定子の終わり
+                      isGroupQualifierExpected: false;
+
+                      parsingGroupName: stream["locals"]["parsingGroupName"];
+                  };
+                  diagnostics: stream["diagnostics"];
+                  options: stream["options"];
+                  remaining: stream["remaining"];
+              }
+          >
+        : // endGroup を呼んだ回数が beginGroup を呼んだ回数を上回った
+          unreachable;
+
 type endGroupIfQualifierExpected<stream extends StreamKind> =
     stream["locals"]["isGroupQualifierExpected"] extends true
-        ? // 親グループの result を取得
-          stream["locals"]["ancestorResults"] extends [
-              ...kind<ExpressionSummaryKind[], infer ancestorResults>,
-              kind<ExpressionSummaryKind, infer parentResult>
-          ]
-            ? kind<
-                  StreamKind,
-                  {
-                      // 親グループの result と子グループの result を結合
-                      result: {
-                          groups: overwriteGroups<
-                              parentResult["groups"],
-                              stream["result"]["groups"]
-                          >;
-                      };
-                      locals: {
-                          // 残りの先祖
-                          ancestorResults: ancestorResults;
-                          // グループ量指定子の終わり
-                          isGroupQualifierExpected: false;
-
-                          parsingGroupName: stream["locals"]["parsingGroupName"];
-                      };
-                      diagnostics: stream["diagnostics"];
-                      options: stream["options"];
-                      remaining: stream["remaining"];
-                  }
-              >
-            : unreachable
+        ? endGroup<stream>
         : stream;
+
+type markHasAlternative<stream extends StreamKind> = kind<
+    StreamKind,
+    {
+        locals: {
+            hasAlternative: true;
+            groups: stream["locals"]["groups"];
+            ancestorScopes: stream["locals"]["ancestorScopes"];
+            parsingGroupName: stream["locals"]["parsingGroupName"];
+            isGroupQualifierExpected: stream["locals"]["isGroupQualifierExpected"];
+        };
+        diagnostics: stream["diagnostics"];
+        options: stream["options"];
+        remaining: stream["remaining"];
+    }
+>;
 
 type startsWith<
     target extends string,
@@ -210,7 +258,6 @@ type skipStringUnchecked<
               remaining: remaining;
               diagnostics: stream["diagnostics"];
               options: stream["options"];
-              result: stream["result"];
               locals: stream["locals"];
           }
       >
@@ -229,7 +276,6 @@ type skipManyChars0<charSet extends string, stream extends StreamKind> = kind<
         remaining: skipManyChars0Core<charSet, stream["remaining"]>;
         diagnostics: stream["diagnostics"];
         options: stream["options"];
-        result: stream["result"];
         locals: stream["locals"];
     }
 >;
@@ -250,7 +296,6 @@ type trySkipAnyChar<stream extends StreamKind> =
                   remaining: remaining;
                   diagnostics: stream["diagnostics"];
                   options: stream["options"];
-                  result: stream["result"];
                   locals: stream["locals"];
               }
           >
@@ -274,7 +319,6 @@ type report<
     StreamKind,
     {
         remaining: stream["remaining"];
-        result: stream["result"];
         diagnostics: [
             ...stream["diagnostics"],
             { message: stream["options"]["errorMessages"][message] }
@@ -290,6 +334,26 @@ type parseString<
 > = startsWith<target, stream> extends true
     ? skipStringUnchecked<target, stream>
     : report<stream, errorMessageId>;
+
+type setAllGroupType<
+    groupType extends GroupTypeKind,
+    stream extends StreamKind
+> = kind<
+    StreamKind,
+    {
+        locals: {
+            groups: setGroupType<groupType, stream["locals"]["groups"]>;
+
+            hasAlternative: stream["locals"]["hasAlternative"];
+            ancestorScopes: stream["locals"]["ancestorScopes"];
+            parsingGroupName: stream["locals"]["parsingGroupName"];
+            isGroupQualifierExpected: stream["locals"]["isGroupQualifierExpected"];
+        };
+        diagnostics: stream["diagnostics"];
+        options: stream["options"];
+        remaining: stream["remaining"];
+    }
+>;
 
 type syntaxCharacter =
     | "^"
@@ -704,6 +768,13 @@ type parseGroupHead<stream extends StreamKind> = startsWith<
       setParsingGroupNameToGroups<parseGroupName<skipAnyCharUnchecked<stream>>>
     : stream;
 
+type markAsOptionalGroupHasAlternative<stream extends StreamKind> =
+    // `|` が直下に含まれるならば
+    stream["locals"]["hasAlternative"] extends true
+        ? // すべてのグループは照合されない可能性がある
+          setAllGroupType<string | undefined, stream>
+        : stream;
+
 type parseGroup<stream extends StreamKind> = parseGroupHead<
     parseString<
         "(",
@@ -714,7 +785,13 @@ type parseGroup<stream extends StreamKind> = parseGroupHead<
 > extends kind<StreamKind, infer stream>
     ? // ここではグループを出ずに、量指定子があるならその後でグループを出る
       markGroupQuantifierExpected<
-          parseString<")", "groups_must_end_with_')'", parseDisjunction<stream>>
+          parseString<
+              ")",
+              "groups_must_end_with_')'",
+              parseDisjunction<stream> extends kind<StreamKind, infer stream>
+                  ? markAsOptionalGroupHasAlternative<stream>
+                  : unreachable
+          >
       >
     : unreachable;
 
@@ -776,17 +853,35 @@ type parseAssertion<stream extends StreamKind> = startsWith<
     ? parseDisjunction<
           skipStringUnchecked<assertionGroupStarts, stream>
       > extends kind<StreamKind, infer stream>
-        ? parseString<")", "groups_must_end_with_')'", stream>
+        ? parseString<
+              ")",
+              "groups_must_end_with_')'",
+              setAllGroupType<undefined, stream>
+          >
         : unreachable
     : unreachable;
 
-type quantifierPrefixSymbol = "*" | "+" | "?";
+type zeroWidthQuantifierSymbol = "*" | "?";
+type quantifierPrefixSymbol = zeroWidthQuantifierSymbol | "+";
 type quantifierPrefixStart = quantifierPrefixSymbol | "{";
+
+/**
+ * QuantifierPrefix ::
+ * | `*` | `+` | `?`
+ * | `{` DecimalDigits[~Sep] `}`
+ * | `{` DecimalDigits[~Sep] `,` `}`
+ * | `{` DecimalDigits[~Sep] `,` DecimalDigits[~Sep] `}`
+ */
 type parseQuantifierPrefix<stream extends StreamKind> = startsWith<
     quantifierPrefixSymbol,
     stream
 > extends true
-    ? skipAnyCharUnchecked<stream>
+    ? skipAnyCharUnchecked<
+          startsWith<zeroWidthQuantifierSymbol, stream> extends true
+              ? // `*` や `?` は空文字列を許容するので照合された文字列が取得できない場合もある
+                setAllGroupType<string | undefined, stream>
+              : stream
+      >
     : // {
     skipAnyCharUnchecked<stream> extends kind<StreamKind, infer stream>
     ? // { DecimalDigits
@@ -867,13 +962,14 @@ type parseAlternative<stream extends StreamKind> =
 type parseDisjunction<stream extends StreamKind> =
     parseAlternative<stream> extends kind<StreamKind, infer stream>
         ? startsWith<"|", stream> extends true
-            ? parseDisjunction<skipAnyCharUnchecked<stream>>
+            ? parseDisjunction<markHasAlternative<skipAnyCharUnchecked<stream>>>
             : stream
         : unreachable;
 /**
  * Pattern[U, N] :: Disjunction[?U, ?N]
  */
-type parsePattern<stream extends StreamKind> = parseDisjunction<stream>;
+type parsePattern<stream extends StreamKind> =
+    markAsOptionalGroupHasAlternative<parseDisjunction<stream>>;
 
 type parseToEnd<stream extends StreamKind> = parsePattern<stream> extends kind<
     StreamKind,
@@ -912,6 +1008,9 @@ type DefaultParseOptions = kind<
     }
 >;
 
+export interface ExpressionSummaryKind {
+    groups: GroupsKind;
+}
 export type ParseRegExpResultKind =
     | [true, ExpressionSummaryKind]
     | [false, DiagnosticKind[]];
@@ -919,54 +1018,14 @@ export type ParseRegExpResultKind =
 export type ParseRegExp<
     pattern extends string,
     options extends ParseOptionsKind = DefaultParseOptions
-> = kind<
-    ParseRegExpResultKind,
-    parseToEnd<createStream<pattern, options>> extends kind<
-        StreamKind,
-        infer stream
-    >
-        ? stream["diagnostics"] extends []
-            ? [true, stream["result"]]
-            : [false, stream["diagnostics"]]
-        : unreachable
->;
-
-{
-    type parse<pattern extends string> = ParseRegExp<pattern> extends kind<
-        [true, ExpressionSummaryKind] | [false, DiagnosticKind[]],
-        infer result
-    >
-        ? result[1]
-        : unreachable;
-
-    type summary<groups extends GroupsKind = {}> = kind<
-        ExpressionSummaryKind,
-        {
-            groups: groups;
-        }
-    >;
-
-    {
-        assert<eq<parse<"a">, summary>>();
-    }
-    {
-        type r = parse<"(a)">;
-        assert<eq<r, summary>>();
-    }
-    {
-        type r = parse<"(?<a>(?<a1>)(?<a2>))(?<b>(?<b1>)(?<b2>))">;
-        assert<
-            eq<
-                r,
-                summary<{
-                    a: string;
-                    a1: string;
-                    a2: string;
-                    b: string;
-                    b1: string;
-                    b2: string;
-                }>
-            >
-        >();
-    }
-}
+> = parseToEnd<createStream<pattern, options>> extends kind<
+    StreamKind,
+    infer stream
+>
+    ? stream["diagnostics"] extends []
+        ? kind<
+              ParseRegExpResultKind,
+              [true, { groups: stream["locals"]["groups"] }]
+          >
+        : kind<ParseRegExpResultKind, [false, stream["diagnostics"]]>
+    : unreachable;

@@ -141,7 +141,7 @@ type ValidatePattern<TPattern extends PatternKind> =
             : never
         : unreachable;
 
-interface TypedRegExpConstructor extends RegExpConstructor {
+interface TypedRegExpConstructor {
     new <TPattern extends PatternKind, TFlags extends FlagsKind>(
         pattern: ValidatePattern<TPattern>,
         flags?: ValidateFlags<TFlags>
@@ -151,7 +151,7 @@ interface TypedRegExpConstructor extends RegExpConstructor {
         flags?: ValidateFlags<TFlags>
     ): TypedRegExp<ParseSpec<TPattern, TFlags>>;
 }
-export const TypedRegExp = RegExp as TypedRegExpConstructor;
+export const TypedRegExp = RegExp as unknown as TypedRegExpConstructor;
 
 export function matchAll<TSpec extends GlobalRegExpSpec>(
     source: string,

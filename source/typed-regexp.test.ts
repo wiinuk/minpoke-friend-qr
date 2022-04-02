@@ -1,17 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable no-invalid-regexp */
 import { assert, eq, UndefinedToOptional } from "./type-utils";
-import {
-    matchAll,
-    RegExpSpec,
-    RegExpSpecWith,
-    TypedRegExp,
-} from "./typed-regexp";
-
-type spec<t> = t extends TypedRegExp<infer T> ? T : never;
-function unreachable(): never {
-    throw new Error("unreachable");
-}
+import { matchAll, RegExpSpecWith, TypedRegExp } from "./typed-regexp";
 
 describe("TypedRegExp", () => {
     it("flags のパース", () => {
@@ -31,9 +21,8 @@ describe("TypedRegExp", () => {
         r.unicode;
     });
     it("同じフラグが含まれるならエラー", () => {
-        //@ts-expect-error 実行時は TypeError が発生する
-        typedRegExp("a", "uiu");
-        expect(() => new RegExp("a", "uiu")).toThrowError(TypeError);
+        //@ts-expect-error 実行時は SyntaxError が発生する
+        expect(() => TypedRegExp("a", "uiu")).toThrowError(SyntaxError);
     });
 });
 describe(matchAll.name, () => {
