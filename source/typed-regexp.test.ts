@@ -24,7 +24,7 @@ describe("TypedRegExp", () => {
         //@ts-expect-error 実行時は SyntaxError が発生する
         expect(() => TypedRegExp("a", "uiu")).toThrowError(SyntaxError);
     });
-    it("エラーメッセージ", () => {
+    it("パターンの構文エラー", () => {
         //@ts-expect-error 実行時は SyntaxError が発生する
         expect(() => TypedRegExp("(", "u")).toThrowError(SyntaxError);
     });

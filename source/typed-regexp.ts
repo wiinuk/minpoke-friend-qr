@@ -132,7 +132,9 @@ type ParseFlags<
         : never
     : result;
 
-type ValidateFlags<TFlags extends FlagsKind> = ParseFlags<TFlags> extends never
+type ValidateFlags<TFlags extends FlagsKind> = FlagsKind extends TFlags
+    ? `ℹ️ 文字列リテラル型を使ってください。`
+    : ParseFlags<TFlags> extends never
     ? never
     : TFlags;
 
@@ -155,17 +157,40 @@ type ParseSpec<
       >
     : never;
 
-type buildErrorMessage<TDiagnostics extends DiagnosticKind[]> =
-    TDiagnostics extends [
-        kind<DiagnosticKind, infer head>,
-        ...kind<DiagnosticKind[], infer tail>
-    ]
-        ? `ℹ️ ${head["message"]}\n${buildErrorMessage<tail>}`
-        : "";
+type stringJoinTail<
+    xs extends string[],
+    separator extends string
+> = xs extends [kind<string, infer head>, ...kind<string[], infer tail>]
+    ? `${separator}${head}${stringJoinTail<tail, separator>}`
+    : ``;
+
+type stringJoin<xs extends string[], separator extends string> = xs extends [
+    kind<string, infer head>,
+    ...kind<string[], infer tail>
+]
+    ? `${head}${stringJoinTail<tail, separator>}`
+    : ``;
+
+type showDiagnostic<d extends DiagnosticKind> =
+    `${d["consumed"]}👈❰❰❰ℹ️ ${d["message"]}❱❱❱${d["remaining"]}}`;
+
+type buildErrorMessage<TDiagnostics extends DiagnosticKind[]> = stringJoin<
+    {
+        [k in keyof TDiagnostics]: `/${showDiagnostic<
+            cast<DiagnosticKind, TDiagnostics[k]>
+        >}/`;
+    },
+    ", "
+>;
 
 type unreachable = never;
 type ValidatePattern<TPattern extends PatternKind> =
-    ParseRegExp<TPattern> extends kind<ParseRegExpResultKind, infer result>
+    PatternKind extends TPattern
+        ? `ℹ️ 文字列リテラル型を使ってください。`
+        : ParseRegExp<TPattern> extends kind<
+              ParseRegExpResultKind,
+              infer result
+          >
         ? result[0] extends true
             ? TPattern
             : buildErrorMessage<cast<DiagnosticKind[], result[1]>>

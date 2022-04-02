@@ -11,11 +11,14 @@ type unreachable = never;
 /** @internal */
 export interface DiagnosticKind {
     message: string;
+    consumed: string;
+    remaining: string;
 }
 type GroupTypeKind = string | undefined;
 /** @internal */
 export type GroupsKind = Record<string, GroupTypeKind>;
 interface StreamKind {
+    consumed: string;
     remaining: string;
     diagnostics: DiagnosticKind[];
     options: ParseOptionsKind;
@@ -60,6 +63,7 @@ type createStream<
     {
         diagnostics: [];
         options: options;
+        consumed: "";
         remaining: source;
         locals: initialLocals;
     }
@@ -77,6 +81,7 @@ type appendGroupName<value extends string, stream extends StreamKind> = kind<
         };
         diagnostics: stream["diagnostics"];
         options: stream["options"];
+        consumed: stream["consumed"];
         remaining: stream["remaining"];
     }
 >;
@@ -106,6 +111,7 @@ type clearParsingGroupName<stream extends StreamKind> = kind<
         };
         diagnostics: stream["diagnostics"];
         options: stream["options"];
+        consumed: stream["consumed"];
         remaining: stream["remaining"];
     }
 >;
@@ -126,6 +132,7 @@ type setParsingGroupNameToGroups<stream extends StreamKind> = kind<
         };
         diagnostics: stream["diagnostics"];
         options: stream["options"];
+        consumed: stream["consumed"];
         remaining: stream["remaining"];
     }
 >;
@@ -141,6 +148,7 @@ type markGroupQuantifierExpected<stream extends StreamKind> = kind<
         };
         diagnostics: stream["diagnostics"];
         options: stream["options"];
+        consumed: stream["consumed"];
         remaining: stream["remaining"];
     }
 >;
@@ -187,6 +195,7 @@ type beginGroup<stream extends StreamKind> = kind<
         };
         diagnostics: stream["diagnostics"];
         options: stream["options"];
+        consumed: stream["consumed"];
         remaining: stream["remaining"];
     }
 >;
@@ -217,6 +226,7 @@ type endGroup<stream extends StreamKind> =
                   };
                   diagnostics: stream["diagnostics"];
                   options: stream["options"];
+                  consumed: stream["consumed"];
                   remaining: stream["remaining"];
               }
           >
@@ -240,6 +250,7 @@ type markHasAlternative<stream extends StreamKind> = kind<
         };
         diagnostics: stream["diagnostics"];
         options: stream["options"];
+        consumed: stream["consumed"];
         remaining: stream["remaining"];
     }
 >;
@@ -256,6 +267,9 @@ type skipStringUnchecked<
     ? kind<
           StreamKind,
           {
+              consumed: stream["remaining"] extends `${infer prefix}${remaining}`
+                  ? `${stream["consumed"]}${prefix}`
+                  : unreachable;
               remaining: remaining;
               diagnostics: stream["diagnostics"];
               options: stream["options"];
@@ -275,20 +289,35 @@ type peekStringOrUndefined<
 
 type skipManyChars0Core<
     charSet extends string,
+    consumed extends string,
     remaining extends string
-> = remaining extends `${charSet}${infer remaining}`
-    ? skipManyChars0Core<charSet, remaining>
-    : remaining;
+> = remaining extends `${charSet}${infer tail}`
+    ? skipManyChars0Core<
+          charSet,
+          `${consumed}${stringHeadOrEmpty<remaining>}`,
+          tail
+      >
+    : [consumed, remaining];
 
-type skipManyChars0<charSet extends string, stream extends StreamKind> = kind<
-    StreamKind,
-    {
-        remaining: skipManyChars0Core<charSet, stream["remaining"]>;
-        diagnostics: stream["diagnostics"];
-        options: stream["options"];
-        locals: stream["locals"];
-    }
->;
+type skipManyChars0<
+    charSet extends string,
+    stream extends StreamKind
+> = skipManyChars0Core<
+    charSet,
+    stream["consumed"],
+    stream["remaining"]
+> extends kind<[string, string], infer result>
+    ? kind<
+          StreamKind,
+          {
+              consumed: result[0];
+              remaining: result[1];
+              diagnostics: stream["diagnostics"];
+              options: stream["options"];
+              locals: stream["locals"];
+          }
+      >
+    : unreachable;
 
 type skipManyChars1<
     charSet extends string,
@@ -299,10 +328,11 @@ type skipManyChars1<
     : report<stream, messageId>;
 
 type trySkipAnyChar<stream extends StreamKind> =
-    stream["remaining"] extends `${string}${infer remaining}`
+    stream["remaining"] extends `${infer head}${infer remaining}`
         ? kind<
               StreamKind,
               {
+                  consumed: `${stream["consumed"]}${head}`;
                   remaining: remaining;
                   diagnostics: stream["diagnostics"];
                   options: stream["options"];
@@ -328,10 +358,15 @@ type report<
 > = kind<
     StreamKind,
     {
+        consumed: stream["consumed"];
         remaining: stream["remaining"];
         diagnostics: [
             ...stream["diagnostics"],
-            { message: stream["options"]["errorMessages"][message] }
+            {
+                consumed: stream["consumed"];
+                remaining: stream["remaining"];
+                message: stream["options"]["errorMessages"][message];
+            }
         ];
         options: stream["options"];
         locals: stream["locals"];
@@ -361,6 +396,7 @@ type setAllGroupType<
         };
         diagnostics: stream["diagnostics"];
         options: stream["options"];
+        consumed: stream["consumed"];
         remaining: stream["remaining"];
     }
 >;
@@ -743,7 +779,7 @@ type parseClassRanges0<stream extends StreamKind> = startsWith<
 > extends true
     ? stream
     : startsWith<"\\", stream> extends true
-    ? parseClassEscape<skipAnyCharUnchecked<stream>>
+    ? parseClassRanges0<parseClassEscape<skipAnyCharUnchecked<stream>>>
     : isEos<stream> extends true
     ? stream
     : parseClassRanges0<skipAnyCharUnchecked<stream>>;
@@ -969,6 +1005,11 @@ type parseAlternative<stream extends StreamKind> =
         ? parseTerm<stream> extends kind<StreamKind, infer stream>
             ? parseAlternative<stream>
             : unreachable
+        : // [構文エラー寛容] いきなり量指定子が来た場合は構文エラーなので報告し、量指定子を読み飛ばす
+        isQuantifierStart<stream> extends true
+        ? parseQuantifier<
+              report<stream, "quantifier_must_be_preceded_by_terminator">
+          >
         : stream;
 
 /**
@@ -1017,6 +1058,7 @@ interface DefaultErrorMessages {
     "'('_is_required": "'(' が必要です";
     "character_classes_must_end_with_']'": "文字クラスの終わりには ']' が必要です";
     character_class_escapes_are_required: "'\\' の後には d, s, w などの文字クラス、n, r, b などの制御文字、または - も有効です。";
+    quantifier_must_be_preceded_by_terminator: "量指定子 ( ?、*、{2,3} など ) の左には、終端記号 ( a、\\w、[…]、(…) など ) が必要です";
 }
 type DefaultParseOptions = kind<
     ParseOptionsKind,

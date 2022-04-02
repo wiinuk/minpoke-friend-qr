@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import type {
     DiagnosticKind,
     ExpressionSummaryKind,
@@ -52,10 +53,31 @@ describe("ParseRegExp", () => {
                 r,
                 [
                     {
+                        consumed: "(";
+                        remaining: "";
                         message: "グループの終わりには ')' が必要です";
                     }
                 ]
             >
         >();
+    });
+    it(`.*+`, () => {
+        type r = parse<".*+">;
+        assert<
+            eq<
+                r,
+                [
+                    {
+                        consumed: ".*";
+                        remaining: "+";
+                        message: "量指定子 ( ?、*、{2,3} など ) の左には、終端記号 ( a、\\w、[…]、(…) など ) が必要です";
+                    }
+                ]
+            >
+        >();
+    });
+    it("[\\w_]", () => {
+        type r = parse<"[\\w_]">;
+        assert<eq<r, summary<{}>>>();
     });
 });
