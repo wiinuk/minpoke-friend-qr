@@ -1,0 +1,163 @@
+/* eslint-disable @typescript-eslint/ban-types */
+import type {
+    ExpressionSummaryKind,
+    ParseRegExp,
+    ParseRegExpResultKind,
+} from "./type-level-regexp-parser";
+import type { cast, kind, UndefinedToOptional, Update } from "./type-utils";
+
+type PatternKind = string;
+type FlagsSpecKind = Partial<Record<FlagKind, true>>;
+export interface RegExpSpec {
+    pattern: PatternKind;
+    flags: FlagsSpecKind;
+    groups: Record<string, string>;
+    groupNumberSet: number;
+}
+export interface RegExpSpecWith<TFlag extends FlagKind> extends RegExpSpec {
+    flags: Update<RegExpSpec["flags"], TFlag, true>;
+}
+export type GlobalRegExpSpec = RegExpSpecWith<"g">;
+
+type FlagKind =
+    // hasIndices
+    | "d"
+    // global
+    | "g"
+    // ignoreCase
+    | "i"
+    // multiline
+    | "m"
+    // dotAll
+    | "s"
+    // unicode
+    | "u"
+    // sticky
+    | "y";
+
+type FlagsKind = string;
+type SpecToGroups<TSpec extends RegExpSpec> =
+    keyof TSpec["groups"] extends never ? undefined : TSpec["groups"];
+interface TypedRegExpMatchArray<
+    TGroups extends Record<string, string> | undefined
+> extends RegExpMatchArray {
+    groups: TGroups;
+}
+
+type HasFlag<
+    TSpec extends RegExpSpec,
+    TFlag extends FlagKind
+> = TSpec["flags"][TFlag] extends true ? true : false;
+
+type GetFlag<
+    TSpec extends RegExpSpec,
+    TFlag extends FlagKind
+> = TSpec["flags"][TFlag] extends true ? TFlag : "";
+
+type Flags<TSpec extends RegExpSpec> = `${GetFlag<TSpec, "d">}${GetFlag<
+    TSpec,
+    "g"
+>}${GetFlag<TSpec, "i">}${GetFlag<TSpec, "m">}${GetFlag<TSpec, "s">}${GetFlag<
+    TSpec,
+    "u"
+>}${GetFlag<TSpec, "y">}`;
+
+type castTo<record, key, t> = cast<
+    key extends keyof record ? record[key] : unknown,
+    t
+>;
+
+export interface TypedRegExp<TSpec extends RegExpSpec> extends RegExp {
+    // Object から継承
+    toString(): TSpec["pattern"];
+    valueOf(): this;
+
+    // --- lib.es5 ---
+    // TODO:
+    // exec
+    lastIndex: HasFlag<TSpec, "g" | "y"> extends true ? number : 0;
+
+    // TODO: "" => "(?:)", "\n" => "\\n"
+    readonly source: TSpec["pattern"];
+
+    readonly global: castTo<RegExp, "global", HasFlag<TSpec, "g">>;
+    readonly ignoreCase: castTo<RegExp, "ignoreCase", HasFlag<TSpec, "i">>;
+    readonly multiline: castTo<RegExp, "multiline", HasFlag<TSpec, "m">>;
+
+    // --- lib.es2015.core ---
+    readonly flags: castTo<RegExp, "flags", Flags<TSpec>>;
+    readonly sticky: castTo<RegExp, "sticky", HasFlag<TSpec, "y">>;
+    readonly unicode: castTo<RegExp, "unicode", HasFlag<TSpec, "u">>;
+
+    // --- lib.es2018.regexp ---
+    readonly dotAll: castTo<RegExp, "dotAll", HasFlag<TSpec, "s">>;
+
+    // --- proposal ---
+    // EcmaScript: `https://tc39.es/proposal-regexp-match-indices`
+    // TypeScript: `https://github.com/microsoft/TypeScript/issues/44227`
+    readonly hasIndices: castTo<RegExp, "hasIndices", HasFlag<TSpec, "d">>;
+}
+
+type ParseFlags<
+    flags extends FlagsKind,
+    result extends FlagsSpecKind = {}
+> = flags extends `${infer head}${infer tail}`
+    ? head extends FlagKind
+        ? // 同じフラグが2回以上指定されているならエラーになる
+          head extends keyof result
+            ? never
+            : ParseFlags<tail, Update<result, head, true>>
+        : never
+    : result;
+
+type ValidateFlags<TFlags extends FlagsKind> = ParseFlags<TFlags> extends never
+    ? never
+    : TFlags;
+
+type ParseSpec<TPattern extends PatternKind, TFlags extends FlagsKind> = kind<
+    RegExpSpec,
+    ParseRegExp<TPattern> extends kind<
+        [true, ExpressionSummaryKind],
+        infer result
+    >
+        ? {
+              pattern: TPattern;
+              flags: ParseFlags<TFlags>;
+              groups: cast<
+                  Record<string, string>,
+                  UndefinedToOptional<result[1]["groups"]>
+              >;
+              // TODO:
+              groupNumberSet: never;
+          }
+        : never
+>;
+
+type unreachable = never;
+type ValidatePattern<TPattern extends PatternKind> =
+    ParseRegExp<TPattern> extends kind<ParseRegExpResultKind, infer result>
+        ? result[0] extends true
+            ? TPattern
+            : never
+        : unreachable;
+
+interface TypedRegExpConstructor extends RegExpConstructor {
+    new <TPattern extends PatternKind, TFlags extends FlagsKind>(
+        pattern: ValidatePattern<TPattern>,
+        flags?: ValidateFlags<TFlags>
+    ): TypedRegExp<ParseSpec<TPattern, TFlags>>;
+    <TPattern extends PatternKind, TFlags extends FlagsKind>(
+        pattern: ValidatePattern<TPattern>,
+        flags?: ValidateFlags<TFlags>
+    ): TypedRegExp<ParseSpec<TPattern, TFlags>>;
+}
+export const TypedRegExp = RegExp as TypedRegExpConstructor;
+
+export function matchAll<TSpec extends GlobalRegExpSpec>(
+    source: string,
+    regexp: TypedRegExp<TSpec>
+) {
+    return source.matchAll(regexp) as IterableIterator<
+        TypedRegExpMatchArray<SpecToGroups<TSpec>>
+    >;
+}
