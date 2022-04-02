@@ -100,7 +100,8 @@ async function searchLocationInfoHeuristic(locationText: string) {
 }
 
 const locationPattern =
-    /(?<=Location\s*[：:]\s*|\b(live\s+in|from)\s+)(\w.*)(?=\s*)/i;
+    /(?<=Location\s*[：:]\s*|\b(live\s+in|from)\b.+?)([\p{L}\p{Nd}\p{Mn}\p{Pc}].*)(?=\s*)/iu;
+
 export function getLocationPattern() {
     return new RegExp(locationPattern, locationPattern.flags + "g");
 }
@@ -244,6 +245,7 @@ async function asyncMain() {
             );
         }
     }
+    const regionDisplayNames = new Intl.DisplayNames([], { type: "region" });
     async function createLocationUI(sourceText: string) {
         const country = await searchLocationInfoHeuristic(sourceText);
         const { searchText, countryCode, countryName } = country ?? {
@@ -251,6 +253,8 @@ async function asyncMain() {
             countryCode: "un",
             countryName: "unknown country",
         };
+        const regionDisplayName =
+            regionDisplayNames.of(countryCode) || countryName;
 
         // `sourceText` の中の `searchText` を選択する
         let selectIndex = sourceText.indexOf(searchText);
@@ -260,26 +264,35 @@ async function asyncMain() {
             selectIndex = 0;
             selectLength = sourceText.length;
         }
+        const selectedText = sourceText.substring(
+            selectIndex,
+            selectIndex + selectLength
+        );
+        const linkURL = `https://www.geonames.org/search.html?q=${encodeURIComponent(
+            selectedText
+        )}`;
         return (
             <span>
                 {sourceText.substring(0, selectIndex)}
-                <span class={qrLocationName}>
-                    {sourceText.substring(
-                        selectIndex,
-                        selectIndex + selectLength
-                    )}
+                <a
+                    class={qrLocationName}
+                    href={linkURL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    {selectedText}
                     <img
                         class={qrLocationFlagName}
                         src={`https://flagcdn.com/${countryCode.toLowerCase()}.svg`}
                         width={16}
                         title={
-                            sourceText !== searchText
-                                ? `${searchText} ⇒ ${countryName}`
-                                : countryName
+                            selectedText !== searchText
+                                ? `${selectedText} ⇒ ${regionDisplayName}`
+                                : regionDisplayName
                         }
-                        alt={countryName}
+                        alt={regionDisplayName}
                     />
-                </span>
+                </a>
                 {sourceText.substring(selectIndex + selectLength)}
             </span>
         );

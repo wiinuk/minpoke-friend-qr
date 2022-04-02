@@ -36,11 +36,15 @@ describe(getLocationPattern.name, () => {
     }
     it("…Location:…", () => {
         expect(matchAll("Location : ABC, DEF")).toEqual([[11, "ABC, DEF"]]);
+        expect(matchAll("Location : 埼玉")).toEqual([[11, "埼玉"]]);
     });
     it("…in …", () => {
         expect(matchAll("I live in ABC, DEF")).toEqual([[10, "ABC, DEF"]]);
+        expect(matchAll("I live in 埼玉")).toEqual([[10, "埼玉"]]);
     });
     it("…from …", () => {
         expect(matchAll("I come from ABC, DEF")).toEqual([[12, "ABC, DEF"]]);
+        expect(matchAll("I come from : ABC, DEF")).toEqual([[14, "ABC, DEF"]]);
+        expect(matchAll("I come from 埼玉")).toEqual([[12, "埼玉"]]);
     });
 });
