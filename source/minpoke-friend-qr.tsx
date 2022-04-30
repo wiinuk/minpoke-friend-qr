@@ -7,6 +7,7 @@ import {
     waitElementLoaded,
 } from "./document-extensions";
 import { createGeonamesClient } from "./geonames";
+import { createPhysicalAnimator } from "./physical-element-animator";
 
 function id<T>(x: T) {
     return x;
@@ -114,8 +115,12 @@ async function asyncMain() {
     const qrCheckboxName = "qr-checkbox";
     const qrLabelName = "qr-label";
     const qrName = "qr";
+    const qrChasingName = "qr-chasing";
+    const qrDraggingName = "qr-dragging";
+    const qrCodeContainerName = "qr-code-container";
     const qrLocationFlagName = "qr-location-flag";
     const qrLocationName = "qr-location";
+    const qrRegionNameName = "qr-region-name";
     addStyle`
         .${idContainerName} {
             float: right;
@@ -128,13 +133,13 @@ async function asyncMain() {
             padding: 0 0.5em;
             border-right: 2px dashed #ddd;
         }
-        .${qrName} {
+        .${qrCodeContainerName} {
             width: 0;
             height: 0;
         }
-        .${qrCheckboxName}:checked + .${qrLabelName} + .${qrName} {
-            width: 5em;
-            height: 5em;
+        .${qrCheckboxName}:checked + .${qrLabelName} + .${qrCodeContainerName} {
+            transform: scale(1);
+            opacity: 1;
         }
         .${qrCheckboxName} {
             display: none;
@@ -143,8 +148,59 @@ async function asyncMain() {
             background: rgb(0 99 223 / 10%);
         }
         .${qrLocationFlagName} {
-            width: 1.2em;
+            height: 0.5em;
             margin: 0.2em;
+        }
+        .${qrRegionNameName} {
+            vertical-align: super;
+            font-size: 0.6em;
+        }
+        .${qrCodeContainerName} {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            z-index: 9999;
+            cursor: grab;
+
+            border-radius: 50%;
+
+            background-color: #ffffff00;
+            background-image:
+                radial-gradient(circle at center center, #bbbbbb00, #ffffff00),
+                repeating-radial-gradient(circle at center center, #bbbbbb00, #bbbbbb2e, 4px, transparent 8px, transparent 4px);
+            background-blend-mode: multiply;
+
+            padding: 1.5rem;
+            box-shadow: 0 0.2rem 1rem 0.5rem rgb(0 0 0 / 10%);
+            border: solid 1px #ccc;
+            backdrop-filter: blur(0.3rem);
+
+            transition:
+                background-color 1s,
+                box-shadow 1s,
+                border 1s,
+                transform 0.2s ease-out,
+                opacity 0.2s ease-out;
+
+            width: 7rem;
+            height: 7rem;
+            transform: scale(0.1);
+            opacity: 0;
+        }
+        .${qrCodeContainerName}:hover {
+            background-color: rgb(192 164 197 / 20%);
+            box-shadow: 0 0.2em 1em 0.5em rgb(250 220 255 / 30%);
+            border: solid 1px #cab8cb;
+        }
+        .${qrCodeContainerName}.${qrChasingName} {
+            background-color: rgb(131 179 193 / 20%);
+            box-shadow: 0 0.2em 1em 0.5em rgb(171 236 255 / 30%);
+            border: solid 1px #afc6c7;
+        }
+        .${qrCodeContainerName}.${qrDraggingName} {
+            background-color: rgb(187 134 197 / 20%);
+            box-shadow: 0 0.2em 1em 0.5em rgb(243 177 255 / 30%);
+            border: solid 1px #c9a6cb;
         }
         `;
     const toastListName = "qr-toast-list";
@@ -185,6 +241,9 @@ async function asyncMain() {
     async function createQRElement(code: string) {
         const qrCodeElement = await createQRCodeElement(code);
         qrCodeElement.classList.add(qrName);
+        const qrCodeContainerElement = (
+            <div class={qrCodeContainerName}>{qrCodeElement}</div>
+        );
 
         const checkboxId = `qr-checkbox-${nextCheckboxId++}`;
         const qrContainerElement = (
@@ -193,9 +252,14 @@ async function asyncMain() {
                 <label class={qrLabelName} for={checkboxId}>
                     QR 📸
                 </label>
-                {qrCodeElement}
+                {qrCodeContainerElement}
             </span>
         );
+        const animator = createPhysicalAnimator(qrCodeContainerElement, {
+            draggingClassName: qrDraggingName,
+            chasingClassName: qrChasingName,
+            initialChasingTargetElement: qrContainerElement,
+        });
         qrContainerElement
             .querySelector("input")
             ?.addEventListener("click", function () {
@@ -208,6 +272,9 @@ async function asyncMain() {
                                 otherCheckbox.checked = false;
                             }
                         });
+                    animator.start();
+                } else {
+                    animator.stop();
                 }
             });
 
@@ -281,6 +348,7 @@ async function asyncMain() {
                     rel="noopener noreferrer"
                 >
                     {selectedText}
+                    <span class={qrRegionNameName}>{regionDisplayName}</span>
                     <img
                         class={qrLocationFlagName}
                         src={`https://flagcdn.com/${countryCode.toLowerCase()}.svg`}

@@ -5,7 +5,7 @@
 // @downloadURL  https://github.com/wiinuk/minpoke-friend-qr/raw/master/minpoke-friend-qr.user.js
 // @updateURL    https://github.com/wiinuk/minpoke-friend-qr/raw/master/minpoke-friend-qr.user.js
 // @homepageURL  https://github.com/wiinuk/minpoke-friend-qr
-// @version      0.3.4
+// @version      0.4.0
 // @description  Add QR code to friend list
 // @author       Wiinuk
 // @match        https://9db.jp/pokego/data/432*
@@ -4019,6 +4019,596 @@ function createGeonamesClient(userName) {
     return new GeonamesClient(userName);
 }
 
+;// CONCATENATED MODULE: ./source/units.ts
+function id(x) {
+    return x;
+}
+function assert() { }
+{
+    assert();
+    assert();
+    assert();
+    assert();
+    assert();
+    assert();
+    assert();
+    assert();
+    assert();
+    assert();
+    assert();
+    assert();
+    assert();
+    assert();
+    assert();
+    assert();
+    assert();
+    assert();
+    assert();
+    assert();
+}
+{
+    assert();
+    assert();
+    assert();
+    assert();
+}
+// -------------- 単位付き数値 --------------
+var privateNumberWithSymbol = Symbol("privateNumberWith");
+function withUnit(value, 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+_unit) {
+    return value;
+}
+function withoutUnit(value) {
+    return value;
+}
+var seconds = id;
+var meter = id;
+var kilogram = id;
+// -------------- 標準 API 拡張 --------------
+function units_add(n1, n2) {
+    return withUnit(withoutUnit(n1) + withoutUnit(n2), id);
+}
+function sub(n1, n2) {
+    return withUnit(withoutUnit(n1) - withoutUnit(n2), id);
+}
+function units_mul(n1, n2) {
+    return withUnit(withoutUnit(n1) * withoutUnit(n2), id);
+}
+function div(n1, n2) {
+    return withUnit(withoutUnit(n1) / withoutUnit(n2), id);
+}
+function neg(n) {
+    return withUnit(-withoutUnit(n), id);
+}
+function lt(n1, n2) {
+    return withoutUnit(n1) < withoutUnit(n2);
+}
+function sqrt(x) {
+    return withUnit(Math.sqrt(withoutUnit(x)), id);
+}
+function max(x1, x2) {
+    return withUnit(Math.max(withoutUnit(x1), withoutUnit(x2)), id);
+}
+function min(x1, x2) {
+    return withUnit(Math.min(withoutUnit(x1), withoutUnit(x2)), id);
+}
+
+;// CONCATENATED MODULE: ./source/vector2.ts
+
+function vector2(x, y) {
+    return [x, y];
+}
+function subV2(x1, x2, result) {
+    if (result === void 0) { result = [withUnit(0, id), withUnit(0, id)]; }
+    result[0] = sub(x1[0], x2[0]);
+    result[1] = sub(x1[1], x2[1]);
+    return result;
+}
+function addV2(x1, x2, result) {
+    if (result === void 0) { result = [withUnit(0, id), withUnit(0, id)]; }
+    result[0] = units_add(x1[0], x2[0]);
+    result[1] = units_add(x1[1], x2[1]);
+    return result;
+}
+function isNumberWithUnit(x) {
+    return typeof x === "number";
+}
+function mulV2(x1, x2, result) {
+    if (result === void 0) { result = [withUnit(0, id), withUnit(0, id)]; }
+    if (!isNumberWithUnit(x1)) {
+        if (!isNumberWithUnit(x2)) {
+            result[0] = units_mul(x1[0], x2[0]);
+            result[1] = units_mul(x1[1], x2[1]);
+        }
+        else {
+            result[0] = units_mul(x1[0], x2);
+            result[1] = units_mul(x1[1], x2);
+        }
+    }
+    else {
+        if (!isNumberWithUnit(x2)) {
+            result[0] = units_mul(x1, x2[0]);
+            result[1] = units_mul(x1, x2[1]);
+        }
+        else {
+            result[0] = units_mul(x1, x2);
+            result[1] = units_mul(x1, x2);
+        }
+    }
+    return result;
+}
+function divV2(x1, x2, result) {
+    if (result === void 0) { result = [withUnit(0, id), withUnit(0, id)]; }
+    if (!isNumberWithUnit(x1)) {
+        if (!isNumberWithUnit(x2)) {
+            result[0] = div(x1[0], x2[0]);
+            result[1] = div(x1[1], x2[1]);
+        }
+        else {
+            result[0] = div(x1[0], x2);
+            result[1] = div(x1[1], x2);
+        }
+    }
+    else {
+        if (!isNumberWithUnit(x2)) {
+            result[0] = div(x1, x2[0]);
+            result[1] = div(x1, x2[1]);
+        }
+        else {
+            result[0] = div(x1, x2);
+            result[1] = div(x1, x2);
+        }
+    }
+    return result;
+}
+function normalizeV2(x, result) {
+    if (result === void 0) { result = [withUnit(0), withUnit(0)]; }
+    var length = sqrt(units_add(units_mul(x[0], x[0]), units_mul(x[1], x[1])));
+    result[0] = div(x[0], length);
+    result[1] = div(x[1], length);
+    return result;
+}
+function distance(p1, p2) {
+    var dx = sub(p1[0], p2[0]);
+    var dy = sub(p1[1], p2[1]);
+    return sqrt(units_add(units_mul(dx, dx), units_mul(dy, dy)));
+}
+function lengthV2(x) {
+    return sqrt(units_add(units_mul(x[0], x[0]), units_mul(x[1], x[1])));
+}
+function dotV2(x1, x2) {
+    return add(mul(x1[0], x2[0]), mul(x1[1], x2[1]));
+}
+
+;// CONCATENATED MODULE: ./source/physical-element-animator.ts
+
+
+
+var px = id;
+var meterParSeconds = id;
+function unreachable() {
+    throw new Error("unreachable");
+}
+function exhaustive(_) {
+    throw new Error("exhaustive");
+}
+function isCollision(c1, c2) {
+    return lt(distance(c1.center, c2.center), units_add(c1.radius, c2.radius));
+}
+function getBoundingClientRect(element) {
+    if (element.parentElement === null) {
+        return;
+    }
+    var style = getComputedStyle(element);
+    if (style.visibility === "hidden") {
+        return;
+    }
+    return element.getBoundingClientRect();
+}
+function boundToShape(rect, meterParPx) {
+    return {
+        center: vector2(units_mul(units_mul(units_add(rect.right, rect.left), withUnit(0.5)), meterParPx), units_mul(units_mul(units_add(rect.bottom, rect.top), withUnit(0.5)), meterParPx)),
+        radius: units_mul(max(rect.width, rect.height), units_mul(withUnit(0.5), meterParPx)),
+    };
+}
+function addDragEventHandler(element, options) {
+    if (options === void 0) { options = {}; }
+    var onDragMove = options.onDragMove, onDragStart = options.onDragStart, onDragEnd = options.onDragEnd;
+    element.addEventListener("mousedown", onDown, false);
+    element.addEventListener("touchstart", onDown, false);
+    function onDown(e) {
+        onDragStart === null || onDragStart === void 0 ? void 0 : onDragStart(e);
+        document.body.addEventListener("mousemove", onMove, false);
+        document.body.addEventListener("touchmove", onMove, false);
+    }
+    function onMove(e) {
+        onDragMove === null || onDragMove === void 0 ? void 0 : onDragMove(e);
+        e.preventDefault();
+        document.body.addEventListener("mouseup", onRelease, false);
+        document.body.addEventListener("touchend", onRelease, false);
+        document.body.addEventListener("touchcancel", onRelease, false);
+    }
+    function onRelease(e) {
+        onDragEnd === null || onDragEnd === void 0 ? void 0 : onDragEnd(e);
+        document.body.removeEventListener("mousemove", onMove, false);
+        document.body.removeEventListener("touchmove", onMove, false);
+        document.body.removeEventListener("mouseup", onRelease, false);
+        document.body.removeEventListener("touchend", onRelease, false);
+        document.body.removeEventListener("touchcancel", onRelease, false);
+    }
+}
+function getSinglePointerEvent(e) {
+    var _a;
+    var r = e instanceof TouchEvent ? (_a = e.changedTouches[0]) !== null && _a !== void 0 ? _a : unreachable() : e;
+    return r;
+}
+var renderContext = {
+    frameTimeSpan: withUnit(0.1, seconds),
+};
+var lastTime = 0;
+function startRenderLoop(time) {
+    var e_1, _a;
+    // 前のフレームからの経過時間を測定
+    renderContext.frameTimeSpan = withUnit(lastTime === 0 ? 1 / 60 : (lastTime - time) * 0.001, seconds);
+    lastTime = time;
+    try {
+        for (var renderers_1 = __values(renderers), renderers_1_1 = renderers_1.next(); !renderers_1_1.done; renderers_1_1 = renderers_1.next()) {
+            var render = renderers_1_1.value;
+            render(renderContext);
+        }
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (renderers_1_1 && !renderers_1_1.done && (_a = renderers_1.return)) _a.call(renderers_1);
+        }
+        finally { if (e_1) throw e_1.error; }
+    }
+    renderLoopCancellation = globalThis.requestAnimationFrame(startRenderLoop);
+}
+var renderers = [];
+var renderLoopCancellation = null;
+function addRenderer(render) {
+    if (renderers.length === 0) {
+        globalThis.requestAnimationFrame(startRenderLoop);
+        console.debug("アニメーションループ開始");
+    }
+    renderers.push(render);
+}
+function removeRenderer(render) {
+    renderers.splice(renderers.indexOf(render), 1);
+    if (renderers.length === 0) {
+        if (renderLoopCancellation !== null) {
+            globalThis.cancelAnimationFrame(renderLoopCancellation);
+            console.debug("アニメーションループ停止");
+        }
+        renderLoopCancellation = null;
+    }
+}
+var colliders = new Set();
+var updateLoopCancellation = null;
+var updateInterval = withUnit(1 / 60, seconds);
+function addCollider(collider) {
+    if (colliders.size === 0) {
+        updateLoopCancellation = globalThis.setInterval(updateFrame, withoutUnit(updateInterval) * 1000);
+        console.debug("物理演算ループ開始");
+    }
+    colliders.add(collider);
+}
+function removeCollider(collider) {
+    colliders.delete(collider);
+    if (colliders.size === 0) {
+        if (updateLoopCancellation !== null) {
+            globalThis.clearTimeout(updateLoopCancellation);
+            console.debug("物理演算ループ停止");
+        }
+        updateLoopCancellation = null;
+    }
+}
+var updateContext = {
+    frameTimeSpan: withUnit(0.1, seconds),
+};
+var lastUpdateTime = 0;
+function updateFrame() {
+    var time = performance.now();
+    updateContext.frameTimeSpan =
+        lastUpdateTime === 0
+            ? updateInterval
+            : withUnit((lastUpdateTime - time) * 0.001, seconds);
+    lastUpdateTime = time;
+    processCollision();
+    updatePosition(updateContext);
+}
+var checkedCollisions = new Set();
+var contact = {
+    isIntersecting: false,
+    normal: vector2(withUnit(0, meter), withUnit(0, meter)),
+    penetration: withUnit(0, meter),
+    normalizedTime: withUnit(0),
+};
+function processCollision() {
+    var e_2, _a, e_3, _b;
+    checkedCollisions.clear();
+    try {
+        // 衝突判定 & 応答
+        var index1 = 0;
+        var collidersCount = colliders.size;
+        try {
+            for (var colliders_1 = __values(colliders), colliders_1_1 = colliders_1.next(); !colliders_1_1.done; colliders_1_1 = colliders_1.next()) {
+                var collider1 = colliders_1_1.value;
+                var index2 = 0;
+                try {
+                    for (var colliders_2 = (e_3 = void 0, __values(colliders)), colliders_2_1 = colliders_2.next(); !colliders_2_1.done; colliders_2_1 = colliders_2.next()) {
+                        var collider2 = colliders_2_1.value;
+                        if (collider1 !== collider2) {
+                            var collisionId = Math.max(index1, index2) * collidersCount +
+                                Math.min(index1, index2);
+                            if (!checkedCollisions.has(collisionId)) {
+                                checkedCollisions.add(collisionId);
+                                contact.isIntersecting = false;
+                                contactColliderVsCollider(collider1, collider2, contact);
+                                collisionResponse(collider1, contact, collider2);
+                            }
+                        }
+                        index2++;
+                    }
+                }
+                catch (e_3_1) { e_3 = { error: e_3_1 }; }
+                finally {
+                    try {
+                        if (colliders_2_1 && !colliders_2_1.done && (_b = colliders_2.return)) _b.call(colliders_2);
+                    }
+                    finally { if (e_3) throw e_3.error; }
+                }
+                index1++;
+            }
+        }
+        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+        finally {
+            try {
+                if (colliders_1_1 && !colliders_1_1.done && (_a = colliders_1.return)) _a.call(colliders_1);
+            }
+            finally { if (e_2) throw e_2.error; }
+        }
+    }
+    finally {
+        checkedCollisions.clear();
+    }
+}
+function createPhysicalAnimator(element, _a) {
+    var _b = _a === void 0 ? {} : _a, _c = _b.draggingClassName, draggingClassName = _c === void 0 ? "dragging" : _c, _d = _b.chasingClassName, chasingClassName = _d === void 0 ? "chasing" : _d, _e = _b.initialChasingTargetElement, initialChasingTargetElement = _e === void 0 ? undefined : _e;
+    var draggingInfo = null;
+    addDragEventHandler(element, {
+        onDragMove: function (e) {
+            var info = getSinglePointerEvent(e);
+            if (draggingInfo) {
+                draggingInfo.position = vector2(units_mul(info.clientX, meterParPx), units_mul(info.clientY, meterParPx));
+            }
+        },
+        onDragStart: function (e) {
+            var _a;
+            element.classList.add(draggingClassName);
+            var info = getSinglePointerEvent(e);
+            // マウスの位置
+            var position = vector2(units_mul(info.clientX, meterParPx), units_mul(info.clientY, meterParPx));
+            // どこをつかんでいるか求める
+            var elementPosition = boundToShape((_a = getBoundingClientRect(element)) !== null && _a !== void 0 ? _a : unreachable(), meterParPx).center;
+            var offset = subV2(position, elementPosition);
+            draggingInfo = {
+                offset: offset,
+                position: position,
+            };
+        },
+        onDragEnd: function () {
+            element.classList.remove(draggingClassName);
+            draggingInfo = null;
+        },
+    });
+    var acceleration = id;
+    // 親ボタンを追いかけるときの加速度
+    var targetAcceleration = withUnit(30, acceleration);
+    // マウスを追いかけるときの加速度
+    var draggingAcceleration = withUnit(500, acceleration);
+    function createVelocity() {
+        var v = 100;
+        return vector2(withUnit((Math.random() - 0.5) * v, meterParSeconds), withUnit((Math.random() - 0.5) * v, meterParSeconds));
+    }
+    // 表示されていないので初期位置が不明
+    var collider = null;
+    function addChaseVelocity(collider, context, selfPosition, targetPosition, acceleration) {
+        if (acceleration === void 0) { acceleration = targetAcceleration; }
+        // 対象への方向を計算
+        var direction = normalizeV2(subV2(targetPosition, selfPosition));
+        // 対象の方向へ加速
+        addV2(collider.velocity, mulV2(units_mul(context.frameTimeSpan, acceleration), direction), collider.velocity);
+    }
+    var renderer = {
+        stop: function () {
+            if (collider) {
+                removeCollider(collider);
+                collider = null;
+            }
+            removeRenderer(selfAnimator);
+        },
+        start: function () {
+            addRenderer(selfAnimator);
+        },
+        chasingTargetElement: initialChasingTargetElement,
+    };
+    var previousChasing = false;
+    var selfAnimator = function (context) {
+        var _a, _b;
+        // 自分と対象の形を決定
+        var selfRect = getBoundingClientRect(element);
+        var targetRect = renderer.chasingTargetElement
+            ? getBoundingClientRect(renderer.chasingTargetElement)
+            : undefined;
+        var self = selfRect ? boundToShape(selfRect, meterParPx) : undefined;
+        if (self && collider) {
+            self.center[0] = collider.center[0];
+            self.center[1] = collider.center[1];
+        }
+        var target = targetRect
+            ? (function () {
+                var r = boundToShape(targetRect, meterParPx);
+                return __assign(__assign({}, r), { radius: units_mul(r.radius, withUnit(2)) });
+            })()
+            : undefined;
+        // 初期位置の決定
+        if (target && collider === null) {
+            collider = {
+                colliderKind: 0 /* Circle */,
+                center: target.center,
+                velocity: createVelocity(),
+                radius: (_a = self === null || self === void 0 ? void 0 : self.radius) !== null && _a !== void 0 ? _a : withUnit(0, meter),
+                friction: withUnit(0.95),
+                mass: withUnit(1, kilogram),
+            };
+            addCollider(collider);
+        }
+        // 初期位置が決定していないならなにもしない
+        if (collider === null) {
+            return;
+        }
+        // 表示されていないなら半径は 0 にする
+        collider.radius = (_b = self === null || self === void 0 ? void 0 : self.radius) !== null && _b !== void 0 ? _b : withUnit(0, meter);
+        // 双方が表示されていてドラッグされていないとき接触していないなら対象を追いかける
+        if (self && target && !draggingInfo && !isCollision(target, self)) {
+            if (!previousChasing) {
+                element.classList.add(chasingClassName);
+                previousChasing = true;
+            }
+            addChaseVelocity(collider, context, self.center, target.center, targetAcceleration);
+        }
+        else {
+            if (previousChasing) {
+                element.classList.remove(chasingClassName);
+                previousChasing = false;
+            }
+        }
+        // ドラッグされているなら、マウスポインタを追いかける
+        if (self && draggingInfo) {
+            // つかんだ位置を追いかける
+            var targetPosition = subV2(draggingInfo.position, draggingInfo.offset);
+            addChaseVelocity(collider, context, self.center, targetPosition, draggingAcceleration);
+        }
+        // スタイルを設定
+        if (selfRect) {
+            var leftTop = subV2(collider.center, mulV2(vector2(selfRect.width, selfRect.height), units_mul(meterParPx, withUnit(0.5))));
+            element.style.left = toCssPosition(leftTop[0]);
+            element.style.top = toCssPosition(leftTop[1]);
+        }
+    };
+    return renderer;
+}
+function collisionResponse(collider1, contact, collider2) {
+    if (!contact.isIntersecting) {
+        return;
+    }
+    var velocity1 = collider1.velocity;
+    var velocity2 = collider2.velocity;
+    var normal = contact.normal;
+    var p = div(units_mul(withUnit(2), sub(sub(units_add(units_mul(velocity1[0], normal[0]), units_mul(velocity1[1], normal[1])), units_mul(velocity2[0], normal[0])), units_mul(velocity2[1], normal[1]))), units_add(collider1.mass, collider2.mass));
+    subV2(collider1.velocity, mulV2(units_mul(p, collider1.mass), normal), collider1.velocity);
+    addV2(collider2.velocity, mulV2(units_mul(p, collider2.mass), normal), collider2.velocity);
+}
+function contactColliderVsCollider(collider1, collider2, result) {
+    switch (collider1.colliderKind) {
+        case 0 /* Circle */:
+            switch (collider2.colliderKind) {
+                case 0 /* Circle */:
+                    return contactCircleVsCircle(collider1, collider2, result);
+                case 1 /* Box */:
+                    return contactCircleVsBox(collider1, collider2, result);
+                default:
+                    return exhaustive(collider2);
+            }
+        case 1 /* Box */:
+            switch (collider2.colliderKind) {
+                case 0 /* Circle */:
+                    return contactCircleVsBox(collider2, collider1, result);
+                case 1 /* Box */:
+                    return contactBoxVsBox(collider1, collider2, result);
+                default:
+                    return exhaustive(collider2);
+            }
+        default:
+            return exhaustive(collider1);
+    }
+}
+function contactCircleVsBox(collider1, collider2, result) {
+    // TODO:
+    throw new Error("TODO");
+}
+function contactBoxVsBox(collider1, collider2, result) {
+    // TODO:
+    throw new Error("TODO");
+}
+function contactCircleVsCircle(collider1, collider2, result) {
+    var center1 = collider1.center;
+    var center2 = collider2.center;
+    var radius1 = collider1.radius;
+    var radius2 = collider2.radius;
+    var distance = subV2(center1, center2);
+    var distanceLength = lengthV2(distance);
+    if (distanceLength < units_add(radius1, radius2)) {
+        result.isIntersecting = true;
+        var penetration = sub(units_add(radius1, radius2), distanceLength);
+        result.penetration = penetration;
+        divV2(distance, distanceLength, result.normal);
+        result.normalizedTime = withUnit(1);
+    }
+    else {
+        result.isIntersecting = false;
+    }
+}
+function updatePosition(context) {
+    var e_4, _a;
+    try {
+        for (var colliders_3 = __values(colliders), colliders_3_1 = colliders_3.next(); !colliders_3_1.done; colliders_3_1 = colliders_3.next()) {
+            var _b = colliders_3_1.value, velocity = _b.velocity, center = _b.center, friction = _b.friction;
+            // 空気抵抗
+            mulV2(velocity, friction, velocity);
+            if (isNaN(withoutUnit(velocity[0]))) {
+                velocity[0] = withUnit(0, meterParSeconds);
+            }
+            if (isNaN(withoutUnit(velocity[1]))) {
+                velocity[1] = withUnit(0, meterParSeconds);
+            }
+            // 移動
+            addV2(center, mulV2(context.frameTimeSpan, velocity), center);
+        }
+    }
+    catch (e_4_1) { e_4 = { error: e_4_1 }; }
+    finally {
+        try {
+            if (colliders_3_1 && !colliders_3_1.done && (_a = colliders_3.return)) _a.call(colliders_3);
+        }
+        finally { if (e_4) throw e_4.error; }
+    }
+}
+function fontSizeAtElement(element) {
+    var _a;
+    return withUnit(Number((_a = getComputedStyle(element).fontSize.match(/(\d+)px/)) === null || _a === void 0 ? void 0 : _a[1]), px);
+}
+function toCssPosition(x) {
+    return Math.round(withoutUnit(div(x, meterParPx))) + "px";
+}
+/** `m/px` */
+var meterParPx = (function () {
+    var x = document.createElement("div");
+    try {
+        x.style.fontSize = "1em";
+        x.appendChild(document.createTextNode("x"));
+        document.body.appendChild(x);
+        return div(withUnit(1, meter), fontSizeAtElement(x));
+    }
+    finally {
+        x.remove();
+    }
+})();
+
 ;// CONCATENATED MODULE: ./source/minpoke-friend-qr.tsx
 
 
@@ -4026,7 +4616,8 @@ function createGeonamesClient(userName) {
 
 
 
-function id(x) {
+
+function minpoke_friend_qr_id(x) {
     return x;
 }
 function handleAsyncError(promise) {
@@ -4040,7 +4631,7 @@ function unique(array, getKey) {
     var e_1, _a;
     var _b;
     var set = (_b = setCache.pop()) !== null && _b !== void 0 ? _b : new Set();
-    getKey !== null && getKey !== void 0 ? getKey : (getKey = id);
+    getKey !== null && getKey !== void 0 ? getKey : (getKey = minpoke_friend_qr_id);
     try {
         var result = [];
         try {
@@ -4243,15 +4834,21 @@ function asyncMain() {
         function createQRElement(code) {
             var _a;
             return __awaiter(this, void 0, void 0, function () {
-                var qrCodeElement, checkboxId, qrContainerElement;
+                var qrCodeElement, qrCodeContainerElement, checkboxId, qrContainerElement, animator;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0: return [4 /*yield*/, createQRCodeElement(code)];
                         case 1:
                             qrCodeElement = _b.sent();
                             qrCodeElement.classList.add(qrName);
+                            qrCodeContainerElement = (jsx("div", __assign({ class: qrCodeContainerName }, { children: qrCodeElement })));
                             checkboxId = "qr-checkbox-".concat(nextCheckboxId++);
-                            qrContainerElement = (jsxs("span", __assign({ class: qrContainerName, title: "QR \u30B3\u30FC\u30C9\u3092\u8868\u793A" }, { children: [jsx("input", { type: "checkbox", class: qrCheckboxName, id: checkboxId }), jsx("label", __assign({ class: qrLabelName, for: checkboxId }, { children: "QR \uD83D\uDCF8" })), qrCodeElement] })));
+                            qrContainerElement = (jsxs("span", __assign({ class: qrContainerName, title: "QR \u30B3\u30FC\u30C9\u3092\u8868\u793A" }, { children: [jsx("input", { type: "checkbox", class: qrCheckboxName, id: checkboxId }), jsx("label", __assign({ class: qrLabelName, for: checkboxId }, { children: "QR \uD83D\uDCF8" })), qrCodeContainerElement] })));
+                            animator = createPhysicalAnimator(qrCodeContainerElement, {
+                                draggingClassName: qrDraggingName,
+                                chasingClassName: qrChasingName,
+                                initialChasingTargetElement: qrContainerElement,
+                            });
                             (_a = qrContainerElement
                                 .querySelector("input")) === null || _a === void 0 ? void 0 : _a.addEventListener("click", function () {
                                 var _this = this;
@@ -4264,6 +4861,10 @@ function asyncMain() {
                                             otherCheckbox.checked = false;
                                         }
                                     });
+                                    animator.start();
+                                }
+                                else {
+                                    animator.stop();
                                 }
                             });
                             return [2 /*return*/, qrContainerElement];
@@ -4358,7 +4959,7 @@ function asyncMain() {
                             }
                             selectedText = sourceText.substring(selectIndex, selectIndex + selectLength);
                             linkURL = "https://www.geonames.org/search.html?q=".concat(encodeURIComponent(selectedText));
-                            return [2 /*return*/, (jsxs("span", { children: [sourceText.substring(0, selectIndex), jsxs("a", __assign({ class: qrLocationName, href: linkURL, target: "_blank", rel: "noopener noreferrer" }, { children: [selectedText, jsx("img", { class: qrLocationFlagName, src: "https://flagcdn.com/".concat(countryCode.toLowerCase(), ".svg"), width: 16, title: selectedText !== searchText
+                            return [2 /*return*/, (jsxs("span", { children: [sourceText.substring(0, selectIndex), jsxs("a", __assign({ class: qrLocationName, href: linkURL, target: "_blank", rel: "noopener noreferrer" }, { children: [selectedText, jsx("span", __assign({ class: qrRegionNameName }, { children: regionDisplayName })), jsx("img", { class: qrLocationFlagName, src: "https://flagcdn.com/".concat(countryCode.toLowerCase(), ".svg"), width: 16, title: selectedText !== searchText
                                                         ? "".concat(selectedText, " \u21D2 ").concat(regionDisplayName)
                                                         : regionDisplayName, alt: regionDisplayName })] })), sourceText.substring(selectIndex + selectLength)] }))];
                     }
@@ -4400,7 +5001,7 @@ function asyncMain() {
                 });
             });
         }
-        var idContainerName, qrNumberName, qrContainerName, qrCheckboxName, qrLabelName, qrName, qrLocationFlagName, qrLocationName, toastListName, toastItemName, toastListElement, nextCheckboxId, regionDisplayNames;
+        var idContainerName, qrNumberName, qrContainerName, qrCheckboxName, qrLabelName, qrName, qrChasingName, qrDraggingName, qrCodeContainerName, qrLocationFlagName, qrLocationName, qrRegionNameName, toastListName, toastItemName, toastListElement, nextCheckboxId, regionDisplayNames;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, waitElementLoaded()];
@@ -4412,9 +5013,13 @@ function asyncMain() {
                     qrCheckboxName = "qr-checkbox";
                     qrLabelName = "qr-label";
                     qrName = "qr";
+                    qrChasingName = "qr-chasing";
+                    qrDraggingName = "qr-dragging";
+                    qrCodeContainerName = "qr-code-container";
                     qrLocationFlagName = "qr-location-flag";
                     qrLocationName = "qr-location";
-                    addStyle(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n        .", " {\n            float: right;\n            display: flex;\n            padding: 0;\n            margin: 0 0.5em;\n            border: 2px solid #ddd;\n        }\n        .", " {\n            padding: 0 0.5em;\n            border-right: 2px dashed #ddd;\n        }\n        .", " {\n            width: 0;\n            height: 0;\n        }\n        .", ":checked + .", " + .", " {\n            width: 5em;\n            height: 5em;\n        }\n        .", " {\n            display: none;\n        }\n        .", " {\n            background: rgb(0 99 223 / 10%);\n        }\n        .", " {\n            width: 1.2em;\n            margin: 0.2em;\n        }\n        "], ["\n        .", " {\n            float: right;\n            display: flex;\n            padding: 0;\n            margin: 0 0.5em;\n            border: 2px solid #ddd;\n        }\n        .", " {\n            padding: 0 0.5em;\n            border-right: 2px dashed #ddd;\n        }\n        .", " {\n            width: 0;\n            height: 0;\n        }\n        .", ":checked + .", " + .", " {\n            width: 5em;\n            height: 5em;\n        }\n        .", " {\n            display: none;\n        }\n        .", " {\n            background: rgb(0 99 223 / 10%);\n        }\n        .", " {\n            width: 1.2em;\n            margin: 0.2em;\n        }\n        "])), idContainerName, qrNumberName, qrName, qrCheckboxName, qrLabelName, qrName, qrCheckboxName, qrLocationName, qrLocationFlagName);
+                    qrRegionNameName = "qr-region-name";
+                    addStyle(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n        .", " {\n            float: right;\n            display: flex;\n            padding: 0;\n            margin: 0 0.5em;\n            border: 2px solid #ddd;\n        }\n        .", " {\n            padding: 0 0.5em;\n            border-right: 2px dashed #ddd;\n        }\n        .", " {\n            width: 0;\n            height: 0;\n        }\n        .", ":checked + .", " + .", " {\n            transform: scale(1);\n            opacity: 1;\n        }\n        .", " {\n            display: none;\n        }\n        .", " {\n            background: rgb(0 99 223 / 10%);\n        }\n        .", " {\n            height: 0.5em;\n            margin: 0.2em;\n        }\n        .", " {\n            vertical-align: super;\n            font-size: 0.6em;\n        }\n        .", " {\n            position: fixed;\n            top: 50%;\n            left: 50%;\n            z-index: 9999;\n            cursor: grab;\n\n            border-radius: 50%;\n\n            background-color: #ffffff00;\n            background-image:\n                radial-gradient(circle at center center, #bbbbbb00, #ffffff00),\n                repeating-radial-gradient(circle at center center, #bbbbbb00, #bbbbbb2e, 4px, transparent 8px, transparent 4px);\n            background-blend-mode: multiply;\n\n            padding: 1.5rem;\n            box-shadow: 0 0.2rem 1rem 0.5rem rgb(0 0 0 / 10%);\n            border: solid 1px #ccc;\n            backdrop-filter: blur(0.3rem);\n\n            transition:\n                background-color 1s,\n                box-shadow 1s,\n                border 1s,\n                transform 0.2s ease-out,\n                opacity 0.2s ease-out;\n\n            width: 7rem;\n            height: 7rem;\n            transform: scale(0.1);\n            opacity: 0;\n        }\n        .", ":hover {\n            background-color: rgb(192 164 197 / 20%);\n            box-shadow: 0 0.2em 1em 0.5em rgb(250 220 255 / 30%);\n            border: solid 1px #cab8cb;\n        }\n        .", ".", " {\n            background-color: rgb(131 179 193 / 20%);\n            box-shadow: 0 0.2em 1em 0.5em rgb(171 236 255 / 30%);\n            border: solid 1px #afc6c7;\n        }\n        .", ".", " {\n            background-color: rgb(187 134 197 / 20%);\n            box-shadow: 0 0.2em 1em 0.5em rgb(243 177 255 / 30%);\n            border: solid 1px #c9a6cb;\n        }\n        "], ["\n        .", " {\n            float: right;\n            display: flex;\n            padding: 0;\n            margin: 0 0.5em;\n            border: 2px solid #ddd;\n        }\n        .", " {\n            padding: 0 0.5em;\n            border-right: 2px dashed #ddd;\n        }\n        .", " {\n            width: 0;\n            height: 0;\n        }\n        .", ":checked + .", " + .", " {\n            transform: scale(1);\n            opacity: 1;\n        }\n        .", " {\n            display: none;\n        }\n        .", " {\n            background: rgb(0 99 223 / 10%);\n        }\n        .", " {\n            height: 0.5em;\n            margin: 0.2em;\n        }\n        .", " {\n            vertical-align: super;\n            font-size: 0.6em;\n        }\n        .", " {\n            position: fixed;\n            top: 50%;\n            left: 50%;\n            z-index: 9999;\n            cursor: grab;\n\n            border-radius: 50%;\n\n            background-color: #ffffff00;\n            background-image:\n                radial-gradient(circle at center center, #bbbbbb00, #ffffff00),\n                repeating-radial-gradient(circle at center center, #bbbbbb00, #bbbbbb2e, 4px, transparent 8px, transparent 4px);\n            background-blend-mode: multiply;\n\n            padding: 1.5rem;\n            box-shadow: 0 0.2rem 1rem 0.5rem rgb(0 0 0 / 10%);\n            border: solid 1px #ccc;\n            backdrop-filter: blur(0.3rem);\n\n            transition:\n                background-color 1s,\n                box-shadow 1s,\n                border 1s,\n                transform 0.2s ease-out,\n                opacity 0.2s ease-out;\n\n            width: 7rem;\n            height: 7rem;\n            transform: scale(0.1);\n            opacity: 0;\n        }\n        .", ":hover {\n            background-color: rgb(192 164 197 / 20%);\n            box-shadow: 0 0.2em 1em 0.5em rgb(250 220 255 / 30%);\n            border: solid 1px #cab8cb;\n        }\n        .", ".", " {\n            background-color: rgb(131 179 193 / 20%);\n            box-shadow: 0 0.2em 1em 0.5em rgb(171 236 255 / 30%);\n            border: solid 1px #afc6c7;\n        }\n        .", ".", " {\n            background-color: rgb(187 134 197 / 20%);\n            box-shadow: 0 0.2em 1em 0.5em rgb(243 177 255 / 30%);\n            border: solid 1px #c9a6cb;\n        }\n        "])), idContainerName, qrNumberName, qrCodeContainerName, qrCheckboxName, qrLabelName, qrCodeContainerName, qrCheckboxName, qrLocationName, qrLocationFlagName, qrRegionNameName, qrCodeContainerName, qrCodeContainerName, qrCodeContainerName, qrChasingName, qrCodeContainerName, qrDraggingName);
                     toastListName = "qr-toast-list";
                     toastItemName = "qr-toast-item";
                     addStyle(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n        .", " {\n            position: fixed;\n            right: 0;\n            bottom: 0;\n            z-index: 9999;\n            list-style: none;\n            padding: 0;\n            margin: 0;\n        }\n        .", ":first-of-type {\n            border-top: 1px solid #ddd;\n        }\n        .", " {\n            background-color: white;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            border-top: 1px dashed #ccc;\n            margin: 0 0.5em;\n            padding: 1em;\n            box-shadow: 0 2px 2px rgb(0 0 0 / 50%);\n        }\n    "], ["\n        .", " {\n            position: fixed;\n            right: 0;\n            bottom: 0;\n            z-index: 9999;\n            list-style: none;\n            padding: 0;\n            margin: 0;\n        }\n        .", ":first-of-type {\n            border-top: 1px solid #ddd;\n        }\n        .", " {\n            background-color: white;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            border-top: 1px dashed #ccc;\n            margin: 0 0.5em;\n            padding: 1em;\n            box-shadow: 0 2px 2px rgb(0 0 0 / 50%);\n        }\n    "])), toastListName, toastItemName, toastItemName);
