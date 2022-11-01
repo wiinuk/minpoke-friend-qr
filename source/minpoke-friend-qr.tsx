@@ -101,7 +101,7 @@ async function searchLocationInfoHeuristic(locationText: string) {
 }
 
 const locationPattern =
-    /(?<=Location\s*[：:]\s*|\b(live\s+in|from)\b.+?)([\p{L}\p{Nd}\p{Mn}\p{Pc}].*)(?=\s*)/iu;
+    /(?<=Location\s*[：:]?\s*|\b(live\s+in|from)\b\s*[：:]?\s*)([\p{L}\p{Nd}\p{Mn}\p{Pc}].*?)(?=[!?。．\r\n]|\.\s|$)/iu;
 
 export function getLocationPattern() {
     return new RegExp(locationPattern, locationPattern.flags + "g");
