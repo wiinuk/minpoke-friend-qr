@@ -266,6 +266,8 @@ export function createPhysicalAnimator(
         initialChasingTargetElement = undefined as undefined | Element,
     } = {}
 ): PhysicalAnimator {
+    const meterParPx = measureMeterParPx(element.ownerDocument);
+
     let draggingInfo: DraggingInfo | null = null;
     addDragEventHandler(element, {
         onDragMove(e) {
@@ -433,8 +435,8 @@ export function createPhysicalAnimator(
                 )
             );
 
-            element.style.left = toCssPosition(leftTop[0]);
-            element.style.top = toCssPosition(leftTop[1]);
+            element.style.left = toCssPosition(leftTop[0], meterParPx);
+            element.style.top = toCssPosition(leftTop[1], meterParPx);
         }
     };
     return renderer;
@@ -591,11 +593,14 @@ function fontSizeAtElement(element: Element) {
         px
     );
 }
-function toCssPosition(x: numberWith<meter>) {
+function toCssPosition(
+    x: numberWith<meter>,
+    meterParPx: ReturnType<typeof measureMeterParPx>
+) {
     return Math.round(withoutUnit<px>(div(x, meterParPx))) + "px";
 }
 /** `m/px` */
-const meterParPx = (() => {
+function measureMeterParPx(document: Document) {
     const x = document.createElement("div");
     try {
         x.style.fontSize = "1em";
@@ -605,7 +610,7 @@ const meterParPx = (() => {
     } finally {
         x.remove();
     }
-})();
+}
 interface PhysicalAnimator {
     chasingTargetElement: Element | undefined;
     stop(): void;
