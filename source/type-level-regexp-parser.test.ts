@@ -8,12 +8,12 @@ import type {
 import { assert, eq, kind } from "./type-utils";
 
 describe("ParseRegExp", () => {
-    type parse<pattern extends string> = ParseRegExp<pattern> extends kind<
-        [true, ExpressionSummaryKind] | [false, DiagnosticKind[]],
-        infer result
-    >
-        ? result[1]
-        : never;
+    type parse<pattern extends string> =
+        ParseRegExp<pattern> extends infer result extends
+            | [true, ExpressionSummaryKind]
+            | [false, DiagnosticKind[]]
+            ? result[1]
+            : never;
 
     // eslint-disable-next-line @typescript-eslint/ban-types
     type summary<groups extends GroupsKind = {}> = kind<

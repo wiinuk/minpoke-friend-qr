@@ -202,8 +202,8 @@ type beginGroup<stream extends StreamKind> = kind<
 type endGroup<stream extends StreamKind> =
     // 親グループを取得
     stream["locals"]["ancestorScopes"] extends [
-        ...kind<ScopeKind[], infer ancestorScopes>,
-        kind<ScopeKind, infer parentScope>
+        ...infer ancestorScopes extends ScopeKind[],
+        infer parentScope extends ScopeKind
     ]
         ? kind<
               StreamKind,
@@ -306,7 +306,7 @@ type skipManyChars0<
     charSet,
     stream["consumed"],
     stream["remaining"]
-> extends kind<[string, string], infer result>
+> extends infer result extends [string, string]
     ? kind<
           StreamKind,
           {
@@ -527,11 +527,11 @@ type parseCharacterClassEscape<stream extends StreamKind> = startsWith<
 > extends true
     ? skipAnyCharUnchecked<stream>
     : // p か P
-    skipAnyCharUnchecked<stream> extends kind<StreamKind, infer stream>
+    skipAnyCharUnchecked<stream> extends infer stream extends StreamKind
     ? startsWith<"{", stream> extends true
         ? parseUnicodePropertyValueExpression<
               skipAnyCharUnchecked<stream>
-          > extends kind<StreamKind, infer stream>
+          > extends infer stream extends StreamKind
             ? parseString<
                   "}",
                   "unicode_property_expressions_must_end_with_'}'",
@@ -587,12 +587,11 @@ type parseRegExpUnicodeEscapeSequence<stream extends StreamKind> = startsWith<
     "u",
     stream
 > extends true
-    ? skipAnyCharUnchecked<stream> extends kind<StreamKind, infer stream>
+    ? skipAnyCharUnchecked<stream> extends infer stream extends StreamKind
         ? startsWith<"{", stream> extends true
-            ? parseCodePoint<skipAnyCharUnchecked<stream>> extends kind<
-                  StreamKind,
-                  infer stream
-              >
+            ? parseCodePoint<
+                  skipAnyCharUnchecked<stream>
+              > extends infer stream extends StreamKind
                 ? parseString<
                       "}",
                       "a_'}'_is_required_after_the_code_point",
@@ -732,7 +731,7 @@ type parseGroupName<stream extends StreamKind> = parseRegExpIdentifierName<
         "group_name_must_be_followed_by_a_'<'",
         clearParsingGroupName<stream>
     >
-> extends kind<StreamKind, infer stream>
+> extends infer stream extends StreamKind
     ? parseString<">", "a_'>'_is_required_after_the_group_name", stream>
     : unreachable;
 
@@ -791,7 +790,7 @@ type isCharacterClassStart<stream extends StreamKind> = startsWith<"[", stream>;
  * | `[^` ClassRanges[?UnicodeMode] `]`
  */
 type parseCharacterClass<stream extends StreamKind> =
-    skipAnyCharUnchecked<stream> extends kind<StreamKind, infer stream>
+    skipAnyCharUnchecked<stream> extends infer stream extends StreamKind
         ? parseString<
               "]",
               "character_classes_must_end_with_']'",
@@ -828,13 +827,13 @@ type parseGroup<stream extends StreamKind> = parseGroupHead<
         // ここでグループに入る
         beginGroup<stream>
     >
-> extends kind<StreamKind, infer stream>
+> extends infer stream extends StreamKind
     ? // ここではグループを出ずに、量指定子があるならその後でグループを出る
       markGroupQuantifierExpected<
           parseString<
               ")",
               "groups_must_end_with_')'",
-              parseDisjunction<stream> extends kind<StreamKind, infer stream>
+              parseDisjunction<stream> extends infer stream extends StreamKind
                   ? markAsOptionalGroupHasAlternative<stream>
                   : unreachable
           >
@@ -866,7 +865,7 @@ type parseAtom<stream extends StreamKind> =
         : startsWith<".", stream> extends true
         ? skipAnyCharUnchecked<stream>
         : startsWith<"\\", stream> extends true
-        ? skipAnyCharUnchecked<stream> extends kind<StreamKind, infer stream>
+        ? skipAnyCharUnchecked<stream> extends infer stream extends StreamKind
             ? isAtomEscapeStart<stream> extends true
                 ? parseAtomEscape<stream>
                 : // "\" の次に AtomEscape が無い場合
@@ -897,13 +896,13 @@ type parseAssertion<stream extends StreamKind> = startsWith<
     stream
 > extends true
     ? skipStringUnchecked<assertionSymbols, stream>
-    : peekStringOrUndefined<assertionGroupStarts, stream> extends kind<
-          string,
-          infer assertionGroupStart
-      >
+    : peekStringOrUndefined<
+          assertionGroupStarts,
+          stream
+      > extends infer assertionGroupStart extends string
     ? parseDisjunction<
           skipStringUnchecked<assertionGroupStarts, stream>
-      > extends kind<StreamKind, infer stream>
+      > extends infer stream extends StreamKind
         ? parseString<
               ")",
               "groups_must_end_with_')'",
@@ -936,15 +935,12 @@ type parseQuantifierPrefix<stream extends StreamKind> = startsWith<
               : stream
       >
     : // {
-    skipAnyCharUnchecked<stream> extends kind<StreamKind, infer stream>
+    skipAnyCharUnchecked<stream> extends infer stream extends StreamKind
     ? // { DecimalDigits
-      skipDecimalDigits1<stream> extends kind<StreamKind, infer stream>
+      skipDecimalDigits1<stream> extends infer stream extends StreamKind
         ? startsWith<",", stream> extends true
             ? // { DecimalDigits ,
-              skipAnyCharUnchecked<stream> extends kind<
-                  StreamKind,
-                  infer stream
-              >
+              skipAnyCharUnchecked<stream> extends infer stream extends StreamKind
                 ? startsWith<"}", stream> extends true
                     ? // { DecimalDigits , }
                       stream
@@ -971,7 +967,7 @@ type isQuantifierStart<stream extends StreamKind> = startsWith<
  * | QuantifierPrefix `?`
  */
 type parseQuantifier<stream extends StreamKind> =
-    parseQuantifierPrefix<stream> extends kind<StreamKind, infer stream>
+    parseQuantifierPrefix<stream> extends infer stream extends StreamKind
         ? startsWith<"?", stream> extends true
             ? skipAnyCharUnchecked<stream>
             : stream
@@ -988,7 +984,7 @@ type isTermStart<stream extends StreamKind> =
 type parseTerm<stream extends StreamKind> =
     isAssertionStart<stream> extends true
         ? parseAssertion<stream>
-        : parseAtom<stream> extends kind<StreamKind, infer stream>
+        : parseAtom<stream> extends infer stream extends StreamKind
         ? isQuantifierStart<stream> extends true
             ? // ここで Atom がグループならグループを終わす
               endGroupIfQualifierExpected<parseQuantifier<stream>>
@@ -1002,7 +998,7 @@ type parseTerm<stream extends StreamKind> =
  */
 type parseAlternative<stream extends StreamKind> =
     isTermStart<stream> extends true
-        ? parseTerm<stream> extends kind<StreamKind, infer stream>
+        ? parseTerm<stream> extends infer stream extends StreamKind
             ? parseAlternative<stream>
             : unreachable
         : // [構文エラー寛容] いきなり量指定子が来た場合は構文エラーなので報告し、量指定子を読み飛ばす
@@ -1018,7 +1014,7 @@ type parseAlternative<stream extends StreamKind> =
  * | Alternative[?U, ?N] `|` Disjunction[?U, ?N]
  */
 type parseDisjunction<stream extends StreamKind> =
-    parseAlternative<stream> extends kind<StreamKind, infer stream>
+    parseAlternative<stream> extends infer stream extends StreamKind
         ? startsWith<"|", stream> extends true
             ? parseDisjunction<markHasAlternative<skipAnyCharUnchecked<stream>>>
             : stream
@@ -1029,14 +1025,12 @@ type parseDisjunction<stream extends StreamKind> =
 type parsePattern<stream extends StreamKind> =
     markAsOptionalGroupHasAlternative<parseDisjunction<stream>>;
 
-type parseToEnd<stream extends StreamKind> = parsePattern<stream> extends kind<
-    StreamKind,
-    infer stream
->
-    ? isEos<stream> extends true
-        ? stream
-        : report<stream, "end_of_source_is_required">
-    : unreachable;
+type parseToEnd<stream extends StreamKind> =
+    parsePattern<stream> extends infer stream extends StreamKind
+        ? isEos<stream> extends true
+            ? stream
+            : report<stream, "end_of_source_is_required">
+        : unreachable;
 
 interface DefaultErrorMessages {
     end_of_source_is_required: "正規表現の終わりが必要です";
@@ -1077,10 +1071,9 @@ export type ParseRegExpResultKind =
 export type ParseRegExp<
     pattern extends string,
     options extends ParseOptionsKind = DefaultParseOptions
-> = parseToEnd<createStream<pattern, options>> extends kind<
-    StreamKind,
-    infer stream
->
+> = parseToEnd<
+    createStream<pattern, options>
+> extends infer stream extends StreamKind
     ? stream["diagnostics"] extends []
         ? kind<
               ParseRegExpResultKind,

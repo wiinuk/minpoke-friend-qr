@@ -141,10 +141,10 @@ type ValidateFlags<TFlags extends FlagsKind> = FlagsKind extends TFlags
 type ParseSpec<
     TPattern extends PatternKind,
     TFlags extends FlagsKind
-> = ParseRegExp<TPattern> extends kind<
-    [true, ExpressionSummaryKind],
-    infer result
->
+> = ParseRegExp<TPattern> extends infer result extends [
+    true,
+    ExpressionSummaryKind
+]
     ? kind<
           RegExpSpec,
           {
@@ -159,16 +159,17 @@ type ParseSpec<
 
 type stringJoinTail<
     xs extends string[],
-    separator extends string
-> = xs extends [kind<string, infer head>, ...kind<string[], infer tail>]
-    ? `${separator}${head}${stringJoinTail<tail, separator>}`
-    : ``;
+    separator extends string,
+    result extends string
+> = xs extends [infer head extends string, ...infer tail extends string[]]
+    ? stringJoinTail<tail, separator, `${result}${separator}${head}`>
+    : result;
 
 type stringJoin<xs extends string[], separator extends string> = xs extends [
-    kind<string, infer head>,
-    ...kind<string[], infer tail>
+    infer head extends string,
+    ...infer tail extends string[]
 ]
-    ? `${head}${stringJoinTail<tail, separator>}`
+    ? `${head}${stringJoinTail<tail, separator, "">}`
     : ``;
 
 type showDiagnostic<d extends DiagnosticKind> =
@@ -187,10 +188,7 @@ type unreachable = never;
 type ValidatePattern<TPattern extends PatternKind> =
     PatternKind extends TPattern
         ? `ℹ️ 文字列リテラル型を使ってください。`
-        : ParseRegExp<TPattern> extends kind<
-              ParseRegExpResultKind,
-              infer result
-          >
+        : ParseRegExp<TPattern> extends infer result extends ParseRegExpResultKind
         ? result[0] extends true
             ? TPattern
             : buildErrorMessage<cast<DiagnosticKind[], result[1]>>
