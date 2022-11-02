@@ -5,7 +5,7 @@
 // @downloadURL  https://github.com/wiinuk/minpoke-friend-qr/raw/master/minpoke-friend-qr.user.js
 // @updateURL    https://github.com/wiinuk/minpoke-friend-qr/raw/master/minpoke-friend-qr.user.js
 // @homepageURL  https://github.com/wiinuk/minpoke-friend-qr
-// @version      0.4.0
+// @version      0.5.0
 // @description  Add QR code to friend list
 // @author       Wiinuk
 // @match        https://9db.jp/pokego/data/432*
@@ -3511,7 +3511,7 @@ function exprOrWrap(s, minPrecedence) {
     return exprOrWrapRaw(s._internal_typeExpression, s._internal_typeExpressionPrecedence, minPrecedence);
 }
 function showTypeMismatchMessage(expectedType, typePrecedence, actualValue, path) {
-    return "Expected ".concat(exprOrWrapRaw(expectedType, typePrecedence, 2 /* Array */), ". actual: ").concat(showObject(actualValue), ". at: ").concat(showFullObjectPath(path));
+    return "Expected ".concat(exprOrWrapRaw(expectedType, typePrecedence, 2 /* Precedence.Array */), ". actual: ").concat(showObject(actualValue), ". at: ").concat(showFullObjectPath(path));
 }
 function showPropertyNotFoundMessage(expectedKey, path) {
     return "Expected property \"".concat(expectedKey, "\". at: ").concat(showFullObjectPath(path));
@@ -3530,7 +3530,7 @@ var string = new (/** @class */ (function (_super) {
     function StringSpec() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this._internal_typeExpression = "string";
-        _this._internal_typeExpressionPrecedence = 3 /* Primary */;
+        _this._internal_typeExpressionPrecedence = 3 /* Precedence.Primary */;
         _this.imitation = "";
         return _this;
     }
@@ -3546,7 +3546,7 @@ var number = new (/** @class */ (function (_super) {
     function NumberSpec() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this._internal_typeExpression = "number";
-        _this._internal_typeExpressionPrecedence = 3 /* Primary */;
+        _this._internal_typeExpressionPrecedence = 3 /* Precedence.Primary */;
         _this.imitation = 0;
         return _this;
     }
@@ -3562,7 +3562,7 @@ var RecordSpec = /** @class */ (function (_super) {
     __extends(RecordSpec, _super);
     function RecordSpec(specs) {
         var _this = _super.call(this) || this;
-        _this._internal_typeExpressionPrecedence = 3 /* Primary */;
+        _this._internal_typeExpressionPrecedence = 3 /* Precedence.Primary */;
         _this._specs = __assign({}, specs);
         return _this;
     }
@@ -3620,7 +3620,7 @@ var object = new (/** @class */ (function (_super) {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this.imitation = Object.freeze({});
         _this._internal_typeExpression = "object";
-        _this._internal_typeExpressionPrecedence = 3 /* Primary */;
+        _this._internal_typeExpressionPrecedence = 3 /* Precedence.Primary */;
         return _this;
     }
     ObjectSpec.prototype._internal_validateCore = function (value, path) {
@@ -3635,7 +3635,7 @@ var ArraySpec = /** @class */ (function (_super) {
     function ArraySpec(_elementSpec) {
         var _this = _super.call(this) || this;
         _this._elementSpec = _elementSpec;
-        _this._internal_typeExpressionPrecedence = 2 /* Array */;
+        _this._internal_typeExpressionPrecedence = 2 /* Precedence.Array */;
         return _this;
     }
     Object.defineProperty(ArraySpec.prototype, "imitation", {
@@ -3647,7 +3647,7 @@ var ArraySpec = /** @class */ (function (_super) {
     });
     Object.defineProperty(ArraySpec.prototype, "_internal_typeExpression", {
         get: function () {
-            return "".concat(exprOrWrap(this._elementSpec, 2 /* Array */), "[]");
+            return "".concat(exprOrWrap(this._elementSpec, 2 /* Precedence.Array */), "[]");
         },
         enumerable: false,
         configurable: true
@@ -3673,14 +3673,14 @@ var OrSpec = /** @class */ (function (_super) {
     function OrSpec(_specs) {
         var _this = _super.call(this) || this;
         _this._specs = _specs;
-        _this._internal_typeExpressionPrecedence = 0 /* Or */;
+        _this._internal_typeExpressionPrecedence = 0 /* Precedence.Or */;
         _this.imitation = _this._specs[0]
             .imitation;
         return _this;
     }
     Object.defineProperty(OrSpec.prototype, "_internal_typeExpression", {
         get: function () {
-            return this._specs.map(function (s) { return exprOrWrap(s, 0 /* Or */); }).join(" | ");
+            return this._specs.map(function (s) { return exprOrWrap(s, 0 /* Precedence.Or */); }).join(" | ");
         },
         enumerable: false,
         configurable: true
@@ -3724,7 +3724,7 @@ var never = new (/** @class */ (function (_super) {
     function NeverSpec() {
         var _this = _super.call(this) || this;
         _this._internal_typeExpression = "never";
-        _this._internal_typeExpressionPrecedence = 3 /* Primary */;
+        _this._internal_typeExpressionPrecedence = 3 /* Precedence.Primary */;
         return _this;
     }
     Object.defineProperty(NeverSpec.prototype, "imitation", {
@@ -3745,7 +3745,7 @@ var unknown = new (/** @class */ (function (_super) {
         var _this = _super.call(this) || this;
         _this.imitation = "unknown";
         _this._internal_typeExpression = "unknown";
-        _this._internal_typeExpressionPrecedence = 3 /* Primary */;
+        _this._internal_typeExpressionPrecedence = 3 /* Precedence.Primary */;
         return _this;
     }
     UnknownSpec.prototype._internal_validateCore = function () {
@@ -3771,13 +3771,13 @@ var AndSpec = /** @class */ (function (_super) {
     function AndSpec(_specs) {
         var _this = _super.call(this) || this;
         _this._specs = _specs;
-        _this._internal_typeExpressionPrecedence = 1 /* And */;
+        _this._internal_typeExpressionPrecedence = 1 /* Precedence.And */;
         return _this;
     }
     Object.defineProperty(AndSpec.prototype, "_internal_typeExpression", {
         get: function () {
             return this._specs
-                .map(function (s) { return exprOrWrap(s, 1 /* And */); })
+                .map(function (s) { return exprOrWrap(s, 1 /* Precedence.And */); })
                 .join(" & ");
         },
         enumerable: false,
@@ -3832,7 +3832,7 @@ var LiteralSpec = /** @class */ (function (_super) {
     function LiteralSpec(imitation) {
         var _this = _super.call(this) || this;
         _this.imitation = imitation;
-        _this._internal_typeExpressionPrecedence = 3 /* Primary */;
+        _this._internal_typeExpressionPrecedence = 3 /* Precedence.Primary */;
         return _this;
     }
     Object.defineProperty(LiteralSpec.prototype, "_internal_typeExpression", {
@@ -4023,7 +4023,9 @@ function createGeonamesClient(userName) {
 function id(x) {
     return x;
 }
-function assert() { }
+function assert() {
+    // 型レベルアサーション関数
+}
 {
     assert();
     assert();
@@ -4062,9 +4064,9 @@ _unit) {
 function withoutUnit(value) {
     return value;
 }
-var seconds = id;
-var meter = id;
-var kilogram = id;
+var seconds = (id);
+var meter = (id);
+var kilogram = (id);
 // -------------- 標準 API 拡張 --------------
 function units_add(n1, n2) {
     return withUnit(withoutUnit(n1) + withoutUnit(n2), id);
@@ -4185,8 +4187,8 @@ function dotV2(x1, x2) {
 
 
 
-var px = id;
-var meterParSeconds = id;
+var px = (id);
+var meterParSeconds = (id);
 function unreachable() {
     throw new Error("unreachable");
 }
@@ -4378,6 +4380,7 @@ function processCollision() {
 }
 function createPhysicalAnimator(element, _a) {
     var _b = _a === void 0 ? {} : _a, _c = _b.draggingClassName, draggingClassName = _c === void 0 ? "dragging" : _c, _d = _b.chasingClassName, chasingClassName = _d === void 0 ? "chasing" : _d, _e = _b.initialChasingTargetElement, initialChasingTargetElement = _e === void 0 ? undefined : _e;
+    var meterParPx = measureMeterParPx(element.ownerDocument);
     var draggingInfo = null;
     addDragEventHandler(element, {
         onDragMove: function (e) {
@@ -4405,7 +4408,7 @@ function createPhysicalAnimator(element, _a) {
             draggingInfo = null;
         },
     });
-    var acceleration = id;
+    var acceleration = (id);
     // 親ボタンを追いかけるときの加速度
     var targetAcceleration = withUnit(30, acceleration);
     // マウスを追いかけるときの加速度
@@ -4458,7 +4461,7 @@ function createPhysicalAnimator(element, _a) {
         // 初期位置の決定
         if (target && collider === null) {
             collider = {
-                colliderKind: 0 /* Circle */,
+                colliderKind: 0 /* ColliderKind.Circle */,
                 center: target.center,
                 velocity: createVelocity(),
                 radius: (_a = self === null || self === void 0 ? void 0 : self.radius) !== null && _a !== void 0 ? _a : withUnit(0, meter),
@@ -4496,8 +4499,8 @@ function createPhysicalAnimator(element, _a) {
         // スタイルを設定
         if (selfRect) {
             var leftTop = subV2(collider.center, mulV2(vector2(selfRect.width, selfRect.height), units_mul(meterParPx, withUnit(0.5))));
-            element.style.left = toCssPosition(leftTop[0]);
-            element.style.top = toCssPosition(leftTop[1]);
+            element.style.left = toCssPosition(leftTop[0], meterParPx);
+            element.style.top = toCssPosition(leftTop[1], meterParPx);
         }
     };
     return renderer;
@@ -4515,20 +4518,20 @@ function collisionResponse(collider1, contact, collider2) {
 }
 function contactColliderVsCollider(collider1, collider2, result) {
     switch (collider1.colliderKind) {
-        case 0 /* Circle */:
+        case 0 /* ColliderKind.Circle */:
             switch (collider2.colliderKind) {
-                case 0 /* Circle */:
+                case 0 /* ColliderKind.Circle */:
                     return contactCircleVsCircle(collider1, collider2, result);
-                case 1 /* Box */:
+                case 1 /* ColliderKind.Box */:
                     return contactCircleVsBox(collider1, collider2, result);
                 default:
                     return exhaustive(collider2);
             }
-        case 1 /* Box */:
+        case 1 /* ColliderKind.Box */:
             switch (collider2.colliderKind) {
-                case 0 /* Circle */:
+                case 0 /* ColliderKind.Circle */:
                     return contactCircleVsBox(collider2, collider1, result);
-                case 1 /* Box */:
+                case 1 /* ColliderKind.Box */:
                     return contactBoxVsBox(collider1, collider2, result);
                 default:
                     return exhaustive(collider2);
@@ -4592,11 +4595,11 @@ function fontSizeAtElement(element) {
     var _a;
     return withUnit(Number((_a = getComputedStyle(element).fontSize.match(/(\d+)px/)) === null || _a === void 0 ? void 0 : _a[1]), px);
 }
-function toCssPosition(x) {
+function toCssPosition(x, meterParPx) {
     return Math.round(withoutUnit(div(x, meterParPx))) + "px";
 }
 /** `m/px` */
-var meterParPx = (function () {
+function measureMeterParPx(document) {
     var x = document.createElement("div");
     try {
         x.style.fontSize = "1em";
@@ -4607,7 +4610,7 @@ var meterParPx = (function () {
     finally {
         x.remove();
     }
-})();
+}
 
 ;// CONCATENATED MODULE: ./source/minpoke-friend-qr.tsx
 
@@ -4806,7 +4809,7 @@ function searchLocationInfoHeuristic(locationText) {
         });
     });
 }
-var locationPattern = /(?<=Location\s*[：:]\s*|\b(live\s+in|from)\b.+?)([\p{L}\p{Nd}\p{Mn}\p{Pc}].*)(?=\s*)/iu;
+var locationPattern = /(?<=Location\s*[：:]?\s*|\b(live\s+in|from)\b\s*[：:]?\s*)([\p{L}\p{Nd}\p{Mn}\p{Pc}].*?)(?=[!?。．\r\n]|\.\s|$)/iu;
 function getLocationPattern() {
     return new RegExp(locationPattern, locationPattern.flags + "g");
 }
