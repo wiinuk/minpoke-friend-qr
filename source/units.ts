@@ -4,9 +4,10 @@ export function id<T>(x: T) {
     return x;
 }
 type kind<kind, t extends kind> = t;
-type unreachable = never;
 type equals<T, S> = [T] extends [S] ? ([S] extends [T] ? true : false) : false;
-function assert<_T extends true>() {}
+function assert<_T extends true>() {
+    // 型レベルアサーション関数
+}
 
 // -------------- 自然数 --------------
 type NatKind = never[];
@@ -154,11 +155,11 @@ export function withoutUnit<u extends UnitKind>(value: numberWith<u>) {
 
 // -------------- SI 単位系 --------------
 export type seconds = { s: _1 };
-export const seconds: Id<seconds> = id;
+export const seconds = id<seconds>;
 export type meter = { m: _1 };
-export const meter: Id<meter> = id;
+export const meter = id<meter>;
 export type kilogram = { kg: _1 };
-export const kilogram: Id<kilogram> = id;
+export const kilogram = id<kilogram>;
 
 // -------------- 標準 API 拡張 --------------
 export function add<u extends UnitKind>(n1: numberWith<u>, n2: numberWith<u>) {

@@ -31,8 +31,8 @@ import {
 } from "./vector2";
 
 type px = Unit<"px">;
-const px: Id<px> = id;
-const meterParSeconds: Id<DivU<meter, seconds>> = id;
+const px = id<px>;
+const meterParSeconds = id<DivU<meter, seconds>>;
 
 function unreachable(): never {
     throw new Error("unreachable");
@@ -307,7 +307,7 @@ export function createPhysicalAnimator(
         },
     });
 
-    const acceleration: Id<DivU<meter, MulU<seconds, seconds>>> = id;
+    const acceleration = id<DivU<meter, MulU<seconds, seconds>>>;
     // 親ボタンを追いかけるときの加速度
     const targetAcceleration = unit(30, acceleration);
     // マウスを追いかけるときの加速度
